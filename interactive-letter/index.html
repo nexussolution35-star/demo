@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A letter for MJ</title>
+<style>
+  /* ---------------------------------------------------------------
+     ALL CONTENT LIVES IN THE CONFIG BLOCK NEAR THE BOTTOM OF THE JS.
+     Change the name, date, message, photo and signature there.
+  ----------------------------------------------------------------*/
+  :root{
+    --bg:#140a1f; --bg2:#2a0f2e; --ink:#f7eefc; --muted:#c9b6d6;
+    --accent:#ff8fb1; --accent2:#ffcf6b; --glow:#ff9ec6;
+    --paper:#fbf5ec; --paper-ink:#3a2c33;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    color:var(--ink); background:#0d0714; overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .stage{
+    position:fixed; inset:0;
+    background:
+      radial-gradient(120% 90% at 50% -10%, #3a123f 0%, #1b0b28 45%, #0d0714 100%);
+    display:grid; place-items:center; overflow:hidden;
+  }
+  .serif{font-family:'Lora',Georgia,'Times New Roman',serif}
+  .scene{
+    position:absolute; inset:0; display:grid; place-items:center;
+    opacity:0; visibility:hidden; transform:translateY(14px);
+    transition:opacity .7s ease, transform .7s ease;
+    padding:24px; text-align:center;
+  }
+  .scene.active{opacity:1; visibility:visible; transform:none}
+  .kicker{
+    letter-spacing:.28em; text-transform:uppercase; font-size:12px;
+    font-weight:700; color:var(--accent2); margin-bottom:18px;
+  }
+  .name-hero{
+    font-size:clamp(64px,17vw,150px); line-height:.9; font-weight:600;
+    background:linear-gradient(120deg,var(--accent2),var(--accent) 60%,#c98bff);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 4px 30px rgba(255,140,180,.35));
+  }
+  .sub{color:var(--muted); max-width:34ch; margin:18px auto 0; line-height:1.6; font-size:16px}
+  .btn{
+    -webkit-appearance:none; appearance:none; border:0; cursor:pointer;
+    margin-top:30px; padding:14px 30px; border-radius:999px; font-size:15px; font-weight:700;
+    color:#fff; background:linear-gradient(120deg,var(--accent),var(--accent2));
+    box-shadow:0 10px 30px rgba(255,140,180,.35); transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .btn:hover{transform:translateY(-2px); box-shadow:0 16px 40px rgba(255,140,180,.5)}
+  .btn:active{transform:translateY(0)}
+  .btn.ghost{background:rgba(255,255,255,.08); box-shadow:none; color:var(--ink); backdrop-filter:blur(6px)}
+  .hint{margin-top:16px; font-size:13px; color:var(--muted); opacity:.8}
+
+  /* ---- STEP 1: gift + ribbon ---- */
+  .gift{position:relative; width:min(62vw,260px); aspect-ratio:1/.86; cursor:pointer}
+  .gift .box{
+    position:absolute; inset:16% 0 0 0; border-radius:12px;
+    background:linear-gradient(160deg,#7a1f4f,#48123a);
+    box-shadow:inset 0 -18px 40px rgba(0,0,0,.35), 0 24px 50px rgba(0,0,0,.5);
+  }
+  .gift .lid{
+    position:absolute; left:-4%; right:-4%; top:6%; height:26%; border-radius:12px;
+    background:linear-gradient(160deg,#8f2a5c,#5a1746);
+    box-shadow:0 10px 24px rgba(0,0,0,.45);
+    transform-origin:50% 100%; transition:transform .9s cubic-bezier(.6,-.2,.3,1.4), opacity .9s;
+    z-index:3;
+  }
+  .gift .ribbon-v{
+    position:absolute; top:0; bottom:0; left:calc(50% - 13px); width:26px;
+    background:linear-gradient(var(--accent2),#ffb14a); z-index:4;
+    box-shadow:0 0 18px rgba(255,180,90,.5); transition:transform 1s ease, opacity .8s ease;
+  }
+  .gift .ribbon-h{
+    position:absolute; left:0; right:0; top:34%; height:26px;
+    background:linear-gradient(90deg,#ffb14a,var(--accent2)); z-index:2;
+    box-shadow:0 0 18px rgba(255,180,90,.5); transition:transform 1s ease, opacity .8s ease;
+  }
+  .gift .bow{
+    position:absolute; left:50%; top:16%; width:78px; height:60px; transform:translate(-50%,-50%);
+    z-index:6; transition:transform .8s cubic-bezier(.5,-0.4,.3,1.5), opacity .7s ease;
+  }
+  .gift .bow::before,.gift .bow::after{
+    content:""; position:absolute; top:8px; width:38px; height:44px; border-radius:60% 60% 40% 40%;
+    background:radial-gradient(circle at 40% 30%,#ffd27a,#ff9d2e); box-shadow:0 0 14px rgba(255,180,90,.6);
+  }
+  .gift .bow::before{left:-2px; transform:rotate(-28deg)}
+  .gift .bow::after{right:-2px; transform:rotate(28deg)}
+  .gift .knot{position:absolute; left:50%; top:20px; width:20px; height:20px; transform:translateX(-50%);
+    background:#ff9d2e; border-radius:50%; z-index:7; box-shadow:0 0 12px rgba(255,180,90,.7)}
+  .gift .glow{position:absolute; inset:20% 6% 0 6%; border-radius:14px; opacity:0; z-index:1;
+    background:radial-gradient(circle at 50% 40%, rgba(255,220,150,.9), transparent 60%);
+    transition:opacity 1s ease}
+  .gift.opening .lid{transform:rotateX(115deg) translateY(-8px); opacity:.85}
+  .gift.opening .bow{transform:translate(-50%,-180%) scale(.4) rotate(18deg); opacity:0}
+  .gift.opening .knot{opacity:0; transition:opacity .4s}
+  .gift.opening .ribbon-v{transform:translateY(-120%) scaleY(1.2); opacity:0}
+  .gift.opening .ribbon-h{transform:translateX(120%); opacity:0}
+  .gift.opening .glow{opacity:1}
+  .gift .tag{position:absolute; left:50%; bottom:-38px; transform:translateX(-50%); white-space:nowrap;
+    color:var(--muted); font-size:13px; letter-spacing:.12em; text-transform:uppercase}
+
+  /* ---- countdown tiles ---- */
+  .count{display:flex; gap:10px; justify-content:center; margin-top:26px; flex-wrap:wrap}
+  .tile{min-width:64px; padding:14px 10px 10px; border-radius:16px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08)}
+  .tile b{display:block; font-size:30px; font-weight:700; line-height:1}
+  .tile span{display:block; margin-top:6px; font-size:10px; letter-spacing:.18em; color:var(--muted); text-transform:uppercase}
+
+  /* ---- letter paper ---- */
+  .paper{
+    width:min(88vw,560px); max-height:74vh; overflow:auto; text-align:left;
+    background:linear-gradient(#fffdf8,var(--paper)); color:var(--paper-ink);
+    border-radius:14px; padding:38px 34px; box-shadow:0 30px 80px rgba(0,0,0,.55);
+    position:relative;
+  }
+  .paper::-webkit-scrollbar{width:8px} .paper::-webkit-scrollbar-thumb{background:#d8c7cf; border-radius:8px}
+  .paper h2{font-size:26px; margin-bottom:18px; color:#7a2f4f}
+  .paper p{line-height:1.85; font-size:17px; margin-bottom:16px;
+    opacity:0; transform:translateY(8px); animation:rise .7s forwards}
+  .paper p:nth-child(2){animation-delay:.15s}
+  .paper p:nth-child(3){animation-delay:.35s}
+  .paper p:nth-child(4){animation-delay:.55s}
+  .paper p:nth-child(5){animation-delay:.75s}
+  @keyframes rise{to{opacity:1; transform:none}}
+
+  /* ---- polaroid ---- */
+  .polaroid{background:#fff; padding:14px 14px 46px; border-radius:6px; transform:rotate(-3deg);
+    box-shadow:0 24px 60px rgba(0,0,0,.5); animation:drop .9s cubic-bezier(.2,.8,.3,1.2)}
+  .polaroid img{display:block; width:min(70vw,300px); aspect-ratio:4/5; object-fit:cover; border-radius:2px; background:#e9dfe6}
+  .polaroid .cap{margin-top:14px; text-align:center; color:#5b4650; font-size:15px}
+  @keyframes drop{from{opacity:0; transform:rotate(8deg) translateY(-30px) scale(.9)} to{opacity:1}}
+
+  /* ---- closing hearts ---- */
+  .heart{position:absolute; bottom:-40px; font-size:20px; animation:float 6s linear infinite; opacity:.0}
+  @keyframes float{0%{transform:translateY(0) scale(.6); opacity:0} 15%{opacity:.9}
+    100%{transform:translateY(-92vh) scale(1.1); opacity:0}}
+  .sig{margin-top:26px; font-size:22px; color:var(--accent2)}
+
+  /* progress dots */
+  .dots{position:fixed; bottom:18px; left:0; right:0; display:flex; gap:8px; justify-content:center; z-index:20}
+  .dots i{width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,.22); transition:all .3s}
+  .dots i.on{background:var(--accent); width:22px; border-radius:6px}
+  .skip-all{position:fixed; top:16px; right:18px; z-index:20; font-size:12px; color:var(--muted);
+    background:rgba(255,255,255,.06); border:0; padding:8px 14px; border-radius:999px; cursor:pointer}
+  canvas#fw{position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="fw"></canvas>
+
+  <!-- STEP 1 -->
+  <section class="scene" data-step="1">
+    <div>
+      <p class="kicker" id="k1">A gift for you</p>
+      <div class="gift" id="gift">
+        <div class="glow"></div>
+        <div class="lid"></div>
+        <div class="box"></div>
+        <div class="ribbon-h"></div>
+        <div class="ribbon-v"></div>
+        <div class="bow"></div>
+        <div class="knot"></div>
+        <div class="tag">tap to untie the ribbon</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="scene" data-step="2">
+    <div>
+      <p class="kicker">Happy birthday</p>
+      <div class="name-hero serif" id="fwName">MJ</div>
+      <p class="sub">Let's celebrate you.</p>
+      <button class="btn" data-next>Continue</button>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="scene" data-step="3">
+    <div>
+      <p class="kicker" id="cdLabel">until MJ's birthday</p>
+      <div class="name-hero serif" style="font-size:clamp(40px,10vw,84px)">Almost time</div>
+      <div class="count" id="count"></div>
+      <button class="btn" data-next>Skip countdown</button>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="scene" data-step="4">
+    <div>
+      <p class="kicker">Your letter</p>
+      <div class="name-hero serif" style="font-size:clamp(34px,8vw,64px)">It's ready ✉</div>
+      <p class="sub">I wrote this just for you.</p>
+      <button class="btn" data-next>Open the letter</button>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="scene" data-step="5">
+    <div class="paper" id="paper"></div>
+    <div style="position:absolute; bottom:56px; left:0; right:0;">
+      <button class="btn" data-next>Next</button>
+    </div>
+  </section>
+
+  <!-- STEP 6 -->
+  <section class="scene" data-step="6">
+    <div>
+      <div class="polaroid">
+        <img id="photo" alt="a memory">
+        <div class="cap" id="photoCap">us</div>
+      </div>
+      <div><button class="btn" data-next>Next</button></div>
+    </div>
+  </section>
+
+  <!-- STEP 7 -->
+  <section class="scene" data-step="7">
+    <div>
+      <p class="kicker">The end… for now</p>
+      <div class="name-hero serif" style="font-size:clamp(30px,7vw,54px)" id="closeLine">With all my love</div>
+      <div class="sig serif" id="sig">— me</div>
+      <div><button class="btn ghost" id="replay">Replay ↺</button></div>
+    </div>
+  </section>
+
+  <button class="skip-all" id="skipAll">skip intro →</button>
+  <div class="dots" id="dots"></div>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIG — edit everything about "your letter" here.
+   ===================================================================== */
+const CONFIG = {
+  recipientName: "MJ",
+  occasion: "birthday",
+  // countdown target (their birthday). Format: "YYYY-MM-DDTHH:MM:SS"
+  birthdayTarget: "2026-07-14T00:00:00",
+  countdownLabel: "until MJ's birthday",
+  letterTitle: "Happy Birthday, MJ",
+  // one string per paragraph
+  message: [
+    "This is placeholder text — drop your real letter here.",
+    "Every line becomes its own paragraph and fades in gently as the page opens.",
+    "Tell them the thing you'd never fit on a card: the memory, the inside joke, the promise.",
+    "You can make this as long as you want — the page scrolls."
+  ],
+  photo: { src: "", caption: "one of my favourites of us" }, // src: a URL or a local file path
+  closingLine: "With all my love",
+  signature: "— your name"
+};
+/* ===================================================================== */
+
+const steps = [...document.querySelectorAll('.scene')];
+const total = steps.length;
+let idx = 0;
+
+// build progress dots
+const dots = document.getElementById('dots');
+steps.forEach(()=>dots.appendChild(document.createElement('i')));
+function paintDots(){ [...dots.children].forEach((d,i)=>d.classList.toggle('on', i===idx)); }
+
+function show(i){
+  idx = Math.max(0, Math.min(total-1, i));
+  steps.forEach((s,n)=>s.classList.toggle('active', n===idx));
+  paintDots();
+  onEnter(idx+1);
+}
+function next(){ if(idx < total-1) show(idx+1); }
+
+document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click', next));
+document.getElementById('skipAll').addEventListener('click', ()=>show(4)); // jump to the letter
+document.getElementById('replay').addEventListener('click', ()=>{ stopFW(); show(0); });
+
+/* ---- populate content from CONFIG ---- */
+document.getElementById('fwName').textContent = CONFIG.recipientName;
+document.getElementById('cdLabel').textContent = CONFIG.countdownLabel;
+document.getElementById('closeLine').textContent = CONFIG.closingLine;
+document.getElementById('sig').textContent = CONFIG.signature;
+document.title = "A letter for " + CONFIG.recipientName;
+(function fillLetter(){
+  const p = document.getElementById('paper');
+  p.innerHTML = "<h2 class='serif'>"+CONFIG.letterTitle+"</h2>" +
+    CONFIG.message.map(t=>"<p>"+t+"</p>").join("");
+})();
+(function fillPhoto(){
+  const img = document.getElementById('photo');
+  document.getElementById('photoCap').textContent = CONFIG.photo.caption || "";
+  if(CONFIG.photo.src){ img.src = CONFIG.photo.src; }
+  else { // tasteful placeholder gradient
+    img.src = "data:image/svg+xml;utf8," + encodeURIComponent(
+      "<svg xmlns='http://www.w3.org/2000/svg' width='300' height='375'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23ffd1e0'/><stop offset='1' stop-color='%23c9a7e6'/></linearGradient></defs><rect width='300' height='375' fill='url(%23g)'/><text x='50%' y='52%' font-family='sans-serif' font-size='18' fill='%238a5a6a' text-anchor='middle'>your photo here</text></svg>");
+  }
+})();
+
+/* ---- STEP 1: ribbon / gift open ---- */
+const gift = document.getElementById('gift');
+let opened = false;
+gift.addEventListener('click', ()=>{
+  if(opened) return; opened = true;
+  gift.classList.add('opening');
+  setTimeout(()=>{ burstAt(innerWidth/2, innerHeight*0.42, 1); }, 500);
+  setTimeout(next, 1150);
+});
+
+/* ---- STEP 3: countdown ---- */
+let cdTimer=null;
+function startCountdown(){
+  const el = document.getElementById('count');
+  const target = new Date(CONFIG.birthdayTarget).getTime();
+  const units=[['days',864e5],['hours',36e5],['min',6e4],['sec',1e3]];
+  function tick(){
+    let diff = Math.max(0, target - Date.now());
+    el.innerHTML = units.map(([label,ms])=>{
+      const v = Math.floor(diff/ms); diff -= v*ms;
+      return "<div class='tile'><b>"+String(v).padStart(2,'0')+"</b><span>"+label+"</span></div>";
+    }).join("");
+  }
+  tick(); cdTimer = setInterval(tick, 1000);
+}
+function stopCountdown(){ if(cdTimer){clearInterval(cdTimer); cdTimer=null;} }
+
+/* ---- fireworks (canvas) ---- */
+const cv = document.getElementById('fw'), ctx = cv.getContext('2d');
+let parts=[], raf=null, autoBurst=null, DPR=Math.min(2,window.devicePixelRatio||1);
+function sizeCanvas(){ cv.width=innerWidth*DPR; cv.height=innerHeight*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+sizeCanvas(); addEventListener('resize', sizeCanvas);
+function burstAt(x,y,scale=1){
+  const hue = Math.floor(Math.random()*360);
+  const n = 70*scale;
+  for(let i=0;i<n;i++){
+    const a=Math.PI*2*i/n, sp=(Math.random()*3+2)*scale;
+    parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,
+      color:`hsl(${hue+Math.random()*40},100%,${60+Math.random()*20}%)`});
+  }
+}
+function loopFW(){
+  ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle='rgba(13,7,20,.22)'; ctx.fillRect(0,0,innerWidth,innerHeight);
+  ctx.globalCompositeOperation='lighter';
+  parts.forEach(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.vy+=0.03; p.vx*=0.99; p.life-=0.012;
+    ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.color;
+    ctx.beginPath(); ctx.arc(p.x,p.y,2.2,0,7); ctx.fill();
+  });
+  parts=parts.filter(p=>p.life>0);
+  raf=requestAnimationFrame(loopFW);
+}
+function startFW(){
+  if(!raf) loopFW();
+  const fire=()=>burstAt(innerWidth*(0.2+Math.random()*0.6), innerHeight*(0.2+Math.random()*0.4), 1);
+  fire(); autoBurst=setInterval(fire, 700);
+}
+function stopFW(){
+  if(autoBurst){clearInterval(autoBurst); autoBurst=null;}
+  if(raf){cancelAnimationFrame(raf); raf=null;}
+  parts=[]; ctx.clearRect(0,0,innerWidth,innerHeight);
+}
+
+/* ---- per-step entry hooks ---- */
+function onEnter(step){
+  // fireworks run only on step 2; countdown ticks only on step 3
+  if(step===2){ startFW(); } else { stopFW(); }
+  if(step===3){ startCountdown(); } else { stopCountdown(); }
+}
+
+// keyboard: arrow / space to advance
+addEventListener('keydown', e=>{ if(e.key==='ArrowRight'||e.key===' '){next();} if(e.key==='ArrowLeft'){show(idx-1);} });
+
+show(0);
+</script>
+</body>
+</html>
