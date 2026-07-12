@@ -1,0 +1,450 @@
+<!DOCTYPE html><html lang="en-US" dir="ltr" data-astro-cid-37fxchfa="" data-theme="system" data-resolved-theme="light" style="color-scheme: light;"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><script>
+      (() => {
+        const denied = {
+          security_storage: 'granted',
+          functionality_storage: 'denied',
+          personalization_storage: 'denied',
+          analytics_storage: 'denied',
+          ad_storage: 'denied',
+          ad_user_data: 'denied',
+          ad_personalization: 'denied',
+          wait_for_update: 500
+        };
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = window.gtag || function gtag(){ window.dataLayer.push(arguments); };
+        window.gtag('consent', 'default', denied);
+        window.gtag('set', 'url_passthrough', true);
+        window.gtag('set', 'ads_data_redaction', true);
+        try {
+          const cookieValue = document.cookie.split(';').map((item) => item.trim()).find((item) => item.startsWith('cookie-consent='));
+          const raw = window.localStorage.getItem('cookie-consent') || (cookieValue ? cookieValue.split('=').slice(1).join('=') : '');
+          const saved = raw ? JSON.parse(decodeURIComponent(raw)) : null;
+          if (saved && saved.google) window.gtag('consent', 'update', saved.google);
+        } catch {}
+      })();
+    </script><script>(function(){const googleTagId = "AW-970149115";
+const googleAdsConversionId = "AW-970149115";
+const ga4MeasurementId = "G-7WR7VYCX8D";
+const googleTagSrc = "/metrics/";
+
+          (() => {
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = window.gtag || function gtag(){ window.dataLayer.push(arguments); };
+            const googleConfigIds = Array.from(new Set([googleTagId, googleAdsConversionId, ga4MeasurementId].filter(Boolean)));
+            const pageViewTargetId = ga4MeasurementId || googleTagId;
+            let googleTagLoaded = false;
+            let googleTagStarted = false;
+            let lastPageViewUrl = '';
+
+            const loadGoogleTag = () => {
+              if (googleTagLoaded || !googleTagSrc || document.querySelector('script[data-twoluv-google-tag]')) return;
+              googleTagLoaded = true;
+              startGoogleTag();
+              const script = document.createElement('script');
+              script.async = true;
+              script.dataset.twoluvGoogleTag = 'true';
+              script.src = googleTagSrc;
+              document.head.appendChild(script);
+            };
+            const startGoogleTag = () => {
+              if (googleTagStarted) return;
+              googleTagStarted = true;
+              window.gtag('js', new Date());
+            };
+
+            const readConsent = () => {
+              try {
+                if (window.__TWOLUV_CONSENT__) return window.__TWOLUV_CONSENT__;
+                const cookieValue = document.cookie.split(';').map((item) => item.trim()).find((item) => item.startsWith('cookie-consent='));
+                const raw = window.localStorage.getItem('cookie-consent') || (cookieValue ? cookieValue.split('=').slice(1).join('=') : '');
+                return raw ? JSON.parse(decodeURIComponent(raw)) : null;
+              } catch {
+                return null;
+              }
+            };
+            const consentAllowsEvents = () => {
+              const categories = readConsent()?.categories;
+              return Boolean(categories?.analytics || categories?.marketing);
+            };
+            const pageContext = () => ({
+              page_location: window.location.href,
+              page_path: `${window.location.pathname}${window.location.search}`,
+              page_title: document.title
+            });
+            const configureGoogleTag = (_reason = 'manual') => {
+              const context = pageContext();
+              for (const tagId of googleConfigIds.length ? googleConfigIds : [googleTagId]) {
+                window.gtag('config', tagId, {
+                  send_page_view: false,
+                  ...context
+                });
+              }
+              if (!consentAllowsEvents()) return;
+              loadGoogleTag();
+              if (pageViewTargetId && lastPageViewUrl !== context.page_location) {
+                lastPageViewUrl = context.page_location;
+                window.gtag('event', 'page_view', {
+                  send_to: pageViewTargetId,
+                  ...context
+                });
+              }
+            };
+
+            window.__TWOLUV_CONFIGURE_GOOGLE_TAG__ = configureGoogleTag;
+            window.addEventListener('2luv:cookie-consent-updated', () => configureGoogleTag('consent-update'));
+            document.addEventListener('astro:page-load', () => configureGoogleTag('astro-page-load'));
+            configureGoogleTag('initial');
+          })();
+        })();</script><script>
+      (() => {
+        const THEMES = ['light', 'dark', 'system'];
+        const STORAGE_KEY = 'theme';
+        const media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+
+        const normalizeTheme = (value) => THEMES.includes(value) ? value : 'system';
+        const readTheme = () => {
+          try {
+            return normalizeTheme(window.localStorage.getItem(STORAGE_KEY));
+          } catch {
+            return 'system';
+          }
+        };
+        const resolveTheme = (theme) => theme === 'system' && media?.matches ? 'dark' : theme === 'dark' ? 'dark' : 'light';
+        const applyTheme = (theme, emit = false) => {
+          const normalizedTheme = normalizeTheme(theme);
+          const resolvedTheme = resolveTheme(normalizedTheme);
+          const dark = resolvedTheme === 'dark';
+          document.documentElement.classList.toggle('dark', dark);
+          document.documentElement.dataset.theme = normalizedTheme;
+          document.documentElement.dataset.resolvedTheme = resolvedTheme;
+          document.documentElement.style.colorScheme = resolvedTheme;
+          if (emit) {
+            window.dispatchEvent(new CustomEvent('lv2:theme-change', {
+              detail: { theme: normalizedTheme, resolvedTheme, dark }
+            }));
+          }
+          return { theme: normalizedTheme, resolvedTheme, dark };
+        };
+        const setTheme = (theme, emit = true) => {
+          const normalizedTheme = normalizeTheme(theme);
+          try {
+            window.localStorage.setItem(STORAGE_KEY, normalizedTheme);
+          } catch {}
+          return applyTheme(normalizedTheme, emit);
+        };
+        const cycleTheme = () => {
+          const current = readTheme();
+          const next = current === 'system' ? 'light' : current === 'light' ? 'dark' : 'system';
+          return setTheme(next);
+        };
+        const syncSystemTheme = () => {
+          if (readTheme() === 'system') applyTheme('system', true);
+        };
+
+        window.__2luvTheme = {
+          applyTheme: () => applyTheme(readTheme()),
+          cycleTheme,
+          getResolvedTheme: () => resolveTheme(readTheme()),
+          getTheme: readTheme,
+          setTheme
+        };
+
+        if (media?.addEventListener) media.addEventListener('change', syncSystemTheme);
+
+        applyTheme(readTheme());
+      })();
+    </script><title>Cookie Policy | Learn what cookies are, which cookies…</title><meta name="description" content="Learn what cookies are, which cookies 2luv uses, why we use them, their duration, domain, and how you can manage your consent."><meta name="theme-color" content="#ec4899"><meta name="color-scheme" content="light dark"><link rel="manifest" href="/manifest.json"><link rel="webmcp" type="application/json" href="/.well-known/webmcp"><link rel="alternate" type="text/plain" title="2luv LLM instructions" href="/llms.txt"><link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" href="/icons/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/icons/apple-icon-180x180.png"><link rel="canonical" href="/en/cookies"><link rel="alternate" hreflang="en-US" href="/en/cookies"><link rel="alternate" hreflang="pt-BR" href="/pt/cookies"><link rel="alternate" hreflang="es-ES" href="/es/cookies"><link rel="alternate" hreflang="fr-FR" href="/fr/cookies"><link rel="alternate" hreflang="de-DE" href="/de/cookies"><link rel="alternate" hreflang="zh-CN" href="/zh/cookies"><link rel="alternate" hreflang="zh-TW" href="/zh-tw/cookies"><link rel="alternate" hreflang="ar-SA" href="/ar/cookies"><link rel="alternate" hreflang="ms-MY" href="/ms/cookies"><link rel="alternate" hreflang="ja-JP" href="/ja/cookies"><link rel="alternate" hreflang="ru-RU" href="/ru/cookies"><link rel="alternate" hreflang="ko-KR" href="/ko/cookies"><link rel="alternate" hreflang="x-default" href="/en/cookies"><meta name="robots" content="index, follow"><meta name="googlebot" content="max-snippet:-1, max-image-preview:large, max-video-preview:-1"><meta property="og:type" content="website"><meta property="og:title" content="Cookie Policy"><meta property="og:description" content="Details about cookies used by 2luv: types, purpose, duration, domain, and how to manage consent. Create Yours on 2luv in Minutes."><meta property="og:url" content="/en/cookies"><meta property="og:site_name" content="2luv - Love Letters"><meta property="og:locale" content="en_US"><meta property="og:image" content="/og-image-home.jpg"><meta property="og:image:alt" content="Cookie Policy"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Cookie Policy"><meta name="twitter:description" content="Details about cookies used by 2luv: types, purpose, duration, domain, and how to manage consent. Create Yours on 2luv in Minutes."><meta name="twitter:image" content="/og-image-home.jpg"><meta name="twitter:image:alt" content="Cookie Policy"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"2luv","url":""}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"2luv","url":"","potentialAction":{"@type":"SearchAction","target":"/en/blog?search={search_term_string}","query-input":"required name=search_term_string"}}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","name":"Breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"/en"},{"@type":"ListItem","position":2,"name":"Cookie Policy","item":"/en/cookies"}]}</script><script type="application/json" id="twoluv-webmcp-public-config">{"definitions":{"get_2luv_info":{"name":"get_2luv_info","description":"Returns a concise public summary of 2luv, its main pages, supported public flows, and safety rules for agents.","inputSchema":{"type":"object","properties":{"locale":{"type":"string","description":"Optional 2luv locale such as en, pt, es, fr, de, zh, zh-tw, ar, ms, ja, ru, or ko."}}},"annotations":{"readOnlyHint":true}},"get_faq":{"name":"get_faq","description":"Returns public frequently asked questions available on the current 2luv page or locale.","inputSchema":{"type":"object","properties":{"locale":{"type":"string","description":"Optional 2luv locale such as en, pt, es, fr, de, zh, zh-tw, ar, ms, ja, ru, or ko."},"topic":{"type":"string","description":"Optional FAQ topic filter such as pricing, privacy, contact, letters, cards, or payments."}}},"annotations":{"readOnlyHint":true}},"get_contact_info":{"name":"get_contact_info","description":"Returns public 2luv contact and support information, including localized support page links.","inputSchema":{"type":"object","properties":{"locale":{"type":"string","description":"Optional 2luv locale such as en, pt, es, fr, de, zh, zh-tw, ar, ms, ja, ru, or ko."}}},"annotations":{"readOnlyHint":true}},"get_legal_info":{"name":"get_legal_info","description":"Returns public links and summaries for 2luv privacy, terms, cookies, copyright, DMCA, and consolidated legal PDF resources.","inputSchema":{"type":"object","properties":{"locale":{"type":"string","description":"Optional 2luv locale such as en, pt, es, fr, de, zh, zh-tw, ar, ms, ja, ru, or ko."},"document":{"type":"string","description":"Optional document filter.","enum":["privacy","terms","cookies","copyright","dmca","legal-document"]}}},"annotations":{"readOnlyHint":true}},"get_pricing":{"name":"get_pricing","description":"Returns current public 2luv pricing for a requested region when available. Brazil uses BRL and Pix support; other supported regions usually use Stripe checkout.","inputSchema":{"type":"object","properties":{"locale":{"type":"string","description":"Optional 2luv locale such as en, pt, es, fr, de, zh, zh-tw, ar, ms, ja, ru, or ko."},"region":{"type":"string","description":"Optional supported 2luv region code such as BR, US, EU, GB, CA, AU, JP, KR, HK, MX, AR, CO, PE, CL, GT, BO, CR, HN, PH, ID, MY, SG, VN, TH, MM, IN, PK, BD, NP, EG, SA, AE, DZ, MA, ZA, NG, KE, or TR."},"letterId":{"type":"string","description":"Optional letter id for follow-up bundle pricing when the page context has one."}}},"annotations":{"readOnlyHint":true}},"get_public_feedback":{"name":"get_public_feedback","description":"Returns all sanitized public 2luv letter feedback visible through the API. Items may include a sanitized display name only; they never include email, phone, links, recipient name, or private letter content.","inputSchema":{"type":"object","properties":{"locale":{"type":"string","description":"Optional 2luv locale such as en, pt, es, fr, de, zh, zh-tw, ar, ms, ja, ru, or ko."},"limit":{"type":"number","description":"Maximum number of public feedback items to return.","minimum":1,"maximum":1000,"default":1000}}},"annotations":{"readOnlyHint":true,"untrustedContentHint":true}},"get_openapi_url":{"name":"get_openapi_url","description":"Returns the public 2luv OpenAPI URL and related API discovery links.","inputSchema":{"type":"object","properties":{}},"annotations":{"readOnlyHint":true}}},"context":{"locale":"en","region":"US","country":null,"currency":"USD","currencySymbol":"$","canonicalUrl":"/en/cookies","siteOrigin":"","contactEmail":"contact@2-luv.com","pages":{"home":"/en","create":"/en/create/love-letter","pricing":"/en/pricing","contact":"/en/contact","privacy":"/en/privacy","terms":"/en/terms","cookies":"/en/cookies","copyright":"/en/copyright","blog":"/en/blog","about":"/en/about"},"endpoints":{"openapi":"https://api.2-luv.com/openapi.json","webmcpManifest":"/.well-known/webmcp","pricing":"https://api.2-luv.com/api/pricing/landing","publicFeedback":"https://api.2-luv.com/api/letter/feedback/public","legalPdf":"https://api.2-luv.com/api/legal-document.pdf?lang=en"},"faq":{"title":"Frequently","items":[{"question":"What is 2Luv?","answer":"2Luv is a platform to create digital love letters and personalized interactive cards. You can surprise the one you love with messages, photos, music, and unique experiences — all in a shareable link.","topic":"letters"},{"question":"Is the free letter really free?","answer":"Yes! You can create a personalized love letter with photos, Spotify music, and a message without paying anything. No credit card or signup needed.","topic":"letters"},{"question":"What are Interactive Cards?","answer":"They are premium experiences you add to your letter — like countdown, timeline, star map, photo gallery, word search, quiz, and many more. There are 16 exclusive card types that turn your message into something unforgettable.","topic":"letters"},{"question":"How much does it cost and how does payment work?","answer":"Interactive Cards cost $ 2.99 as a one-time payment. No monthly fee, no subscription. You pay once and get lifetime access, including all future updates. We accept credit and debit cards.","topic":"letters"},{"question":"How long does my link stay available?","answer":"Your Interactive Cards link stays available forever — lifetime access with no expiration date.","topic":"letters"},{"question":"Can I edit my letter after creating it?","answer":"Yes! Premium users can edit their letters and cards at any time. Just access the edit panel through the same link used for creation.","topic":"letters"},{"question":"Does it work on mobile?","answer":"Yes, 2Luv was built mobile-first. Both creation and viewing work perfectly on any device — smartphone, tablet, or computer.","topic":"letters"},{"question":"Does the recipient need to sign up?","answer":"No! The recipient only needs to open the link. No app to download, no account to create, no login. It is an instant and accessible experience.","topic":"letters"},{"question":"Is my content private?","answer":"Yes. Your letters are private and can only be accessed by whoever has the link. We do not index the content in search engines and do not share your data with third parties.","topic":"letters"},{"question":"Can I share via QR Code?","answer":"Yes! Premium users can generate an exclusive QR Code for the letter. Perfect for printing on gifts, physical cards, or invitations.","topic":"letters"},{"question":"What are the available plans?","answer":"We offer lifetime plan (permanent access to your letter) and annual plan (access for 1 year, renewable). Both allow complete customization and unlimited editing.","topic":"pricing"},{"question":"Can I edit my letter?","answer":"Yes! Once your letter is paid, you have the freedom to edit your letter at any time, even changing its purpose without any limitation, meaning you can edit whenever and however you want.","topic":"letters"}]},"legalDocuments":[{"key":"privacy","title":"Privacy Policy","url":"/en/privacy","description":"Privacy Policy for 2luv users."},{"key":"terms","title":"Terms of Service","url":"/en/terms","description":"Terms of Service for 2luv users."},{"key":"cookies","title":"Cookie Policy","url":"/en/cookies","description":"Cookie Policy for 2luv users."},{"key":"copyright","title":"Copyright and DMCA","url":"/en/copyright","description":"Copyright and DMCA for 2luv users."},{"key":"legal-document","title":"Consolidated Legal PDF source page","url":"/en/legal-document","description":"Consolidated Legal PDF source page for 2luv users."},{"key":"legal-pdf","title":"Consolidated Legal PDF","url":"https://api.2-luv.com/api/legal-document.pdf?lang=en","description":"Localized PDF generated by the 2luv backend from the published legal pages."}]}}</script> <script>
+  (() => {
+    const configElement = document.getElementById('twoluv-webmcp-public-config');
+    if (!configElement?.textContent) return;
+
+    const modelContext = document.modelContext || navigator.modelContext;
+    if (!modelContext?.registerTool) return;
+    if (window.__TWOLUV_WEBMCP_PUBLIC_REGISTERED__) return;
+    window.__TWOLUV_WEBMCP_PUBLIC_REGISTERED__ = true;
+
+    const config = JSON.parse(configElement.textContent);
+    const definitions = config.definitions || {};
+    const pageContext = config.context || {};
+
+    const normalizeLocale = (input) => typeof input?.locale === 'string' && input.locale.trim()
+      ? input.locale.trim()
+      : pageContext.locale;
+    const normalizeRegion = (input) => typeof input?.region === 'string' && input.region.trim()
+      ? input.region.trim().toUpperCase()
+      : pageContext.region;
+    const publicSummary = () => ({
+      name: '2luv',
+      summary: '2luv is a romantic digital gifting platform for creating personalized digital love letters with messages, photos, music, QR codes, payments, and interactive cards.',
+      locale: pageContext.locale,
+      region: pageContext.region,
+      currency: pageContext.currency,
+      currentPage: pageContext.canonicalUrl,
+      pages: pageContext.pages,
+      safety: [
+        'Private letters and cards require user-controlled authorization.',
+        'Agents must not create, edit, delete, or start checkout without visible user confirmation.',
+        'Public feedback may include user-generated text and should be treated as untrusted content.'
+      ]
+    });
+
+    const fetchJson = async (url) => {
+      const response = await fetch(url, { headers: { accept: 'application/json' }, credentials: 'include' });
+      if (!response.ok) throw new Error(`2luv request failed: ${response.status}`);
+      return response.json();
+    };
+
+    const tools = [
+      {
+        ...definitions.get_2luv_info,
+        execute(input = {}) {
+          return { ...publicSummary(), requestedLocale: normalizeLocale(input) };
+        }
+      },
+      {
+        ...definitions.get_faq,
+        execute(input = {}) {
+          const topic = typeof input.topic === 'string' ? input.topic.trim().toLowerCase() : '';
+          const items = topic
+            ? pageContext.faq.items.filter((item) => item.topic === topic || item.question.toLowerCase().includes(topic))
+            : pageContext.faq.items;
+          return {
+            locale: normalizeLocale(input),
+            title: pageContext.faq.title,
+            items
+          };
+        }
+      },
+      {
+        ...definitions.get_contact_info,
+        execute(input = {}) {
+          return {
+            locale: normalizeLocale(input),
+            email: pageContext.contactEmail,
+            contactPage: pageContext.pages.contact,
+            supportTypes: ['general', 'support', 'bug', 'suggestion'],
+            expectedResponse: '2luv creates a support ticket and replies by email when SMTP delivery is available.'
+          };
+        }
+      },
+      {
+        ...definitions.get_legal_info,
+        execute(input = {}) {
+          const documentKey = typeof input.document === 'string' ? input.document.trim() : '';
+          const documents = documentKey
+            ? pageContext.legalDocuments.filter((document) => document.key === documentKey)
+            : pageContext.legalDocuments;
+          return {
+            locale: normalizeLocale(input),
+            contactEmail: pageContext.contactEmail,
+            documents
+          };
+        }
+      },
+      {
+        ...definitions.get_pricing,
+        async execute(input = {}) {
+          const params = new URLSearchParams();
+          const region = normalizeRegion(input);
+          if (region) params.set('region', region);
+          if (typeof input.letterId === 'string' && input.letterId.trim()) params.set('letter_id', input.letterId.trim());
+          const pricing = await fetchJson(`${pageContext.endpoints.pricing}?${params.toString()}`).catch((error) => ({
+            unavailable: true,
+            error: error instanceof Error ? error.message : 'pricing_unavailable'
+          }));
+          return {
+            locale: normalizeLocale(input),
+            requestedRegion: region,
+            pricing,
+            checkoutNote: region === 'BR' ? 'Brazilian checkout can use Pix through Banco Inter.' : 'Non-Brazilian checkout generally uses Stripe.'
+          };
+        }
+      },
+      {
+        ...definitions.get_public_feedback,
+        async execute(input = {}) {
+          const params = new URLSearchParams();
+          params.set('locale', normalizeLocale(input));
+          const limit = Number(input.limit || 1000);
+          params.set('limit', String(Math.min(1000, Math.max(1, Number.isFinite(limit) ? limit : 1000))));
+          return fetchJson(`${pageContext.endpoints.publicFeedback}?${params.toString()}`).catch((error) => ({
+            success: false,
+            unavailable: true,
+            items: [],
+            total: 0,
+            error: error instanceof Error ? error.message : 'public_feedback_unavailable'
+          }));
+        }
+      },
+      {
+        ...definitions.get_openapi_url,
+        execute() {
+          return {
+            openapi: pageContext.endpoints.openapi,
+            webmcpManifest: pageContext.endpoints.webmcpManifest,
+            llmsTxt: `${pageContext.siteOrigin}/llms.txt`,
+            legalPdf: pageContext.endpoints.legalPdf
+          };
+        }
+      }
+    ].filter((tool) => tool?.name && typeof tool.execute === 'function');
+
+    for (const tool of tools) {
+      Promise.resolve(modelContext.registerTool(tool)).catch((error) => {
+        console.debug('[2luv] WebMCP tool registration skipped.', tool.name, error);
+      });
+    }
+  })();
+</script><link rel="stylesheet" href="/_astro/astro-context.BXLncH-E.css"><style>.legal-print-cta[data-astro-cid-cr7ufytq]{display:grid;grid-template-columns:auto minmax(0,1fr);max-width:760px;width:100%;align-items:center;gap:12px;border:1px solid hsl(var(--border));border-radius:18px;padding:10px;background:hsl(var(--background) / .58)}.legal-print-button[data-astro-cid-cr7ufytq]{display:inline-flex;min-height:52px;flex:0 0 auto;align-items:center;justify-content:center;gap:9px;border:1px solid hsl(var(--primary));border-radius:16px;padding:0 18px;background:hsl(var(--primary));color:hsl(var(--primary-foreground));font:inherit;font-weight:800;text-decoration:none;box-shadow:0 12px 28px hsl(var(--primary) / .18)}.legal-print-button[data-astro-cid-cr7ufytq] svg[data-astro-cid-cr7ufytq]{width:17px;height:17px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}.legal-print-cta[data-astro-cid-cr7ufytq] p[data-astro-cid-cr7ufytq]{margin:0;color:hsl(var(--muted-foreground));font-size:.92rem;line-height:1.5}[data-astro-cid-cr7ufytq][dir=rtl] .legal-print-cta[data-astro-cid-cr7ufytq]{text-align:right}@media(max-width:720px){.legal-print-cta[data-astro-cid-cr7ufytq]{display:grid;grid-template-columns:1fr;align-items:stretch}.legal-print-button[data-astro-cid-cr7ufytq]{width:100%}}@media print{.legal-print-cta[data-astro-cid-cr7ufytq]{display:none}}
+.blog-breadcrumb-shell[data-astro-cid-qaanghzh]{display:inline-flex;align-items:center;margin-bottom:24px;border:1px solid rgb(226 232 240 / .7);border-radius:999px;background:#fff9;padding:6px 12px;box-shadow:0 4px 16px #0f172a0f;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}.blog-breadcrumb[data-astro-cid-qaanghzh] ol[data-astro-cid-qaanghzh]{display:flex;flex-wrap:nowrap;align-items:center;gap:4px;margin:0;padding:0;list-style:none;color:hsl(var(--muted-foreground));font-size:11px;line-height:1}.breadcrumb-item[data-astro-cid-qaanghzh],.breadcrumb-separator[data-astro-cid-qaanghzh]{display:inline-flex;min-width:0;align-items:center}.breadcrumb-link[data-astro-cid-qaanghzh],.breadcrumb-page[data-astro-cid-qaanghzh]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;letter-spacing:0}.breadcrumb-link[data-astro-cid-qaanghzh]{color:hsl(var(--muted-foreground));text-decoration:none;transition:color .16s ease}.breadcrumb-link[data-astro-cid-qaanghzh]:hover,.breadcrumb-link[data-astro-cid-qaanghzh]:focus-visible{color:hsl(var(--foreground))}.breadcrumb-link[data-astro-cid-qaanghzh]:focus-visible{outline:2px solid hsl(var(--ring));outline-offset:3px;border-radius:999px}.breadcrumb-home-link[data-astro-cid-qaanghzh]{display:inline-flex;align-items:center;color:hsl(var(--muted-foreground))}.breadcrumb-home-link[data-astro-cid-qaanghzh] svg[data-astro-cid-qaanghzh]{width:12px;height:12px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}.breadcrumb-page[data-astro-cid-qaanghzh]{display:block;max-width:150px;color:#334155;font-weight:500}.breadcrumb-separator[data-astro-cid-qaanghzh] span[data-astro-cid-qaanghzh]{color:#94a3b8;font-size:11px;line-height:1}@media(max-width:640px){.blog-breadcrumb-shell[data-astro-cid-qaanghzh]{margin-bottom:18px}}@media(min-width:640px){.blog-breadcrumb[data-astro-cid-qaanghzh] ol[data-astro-cid-qaanghzh]{gap:6px}.breadcrumb-page[data-astro-cid-qaanghzh]{max-width:220px}}.dark .blog-breadcrumb-shell[data-astro-cid-qaanghzh]{border-color:#ffffff1a;background:#ffffff0c;box-shadow:0 4px 16px #0000002e}.dark .breadcrumb-page[data-astro-cid-qaanghzh]{color:#e2e8f0}.dark .breadcrumb-separator[data-astro-cid-qaanghzh] span[data-astro-cid-qaanghzh]{color:#64748b}
+</style><link rel="stylesheet" href="/_astro/cookies.BbLOpoKm.css"><link rel="stylesheet" href="/_astro/BaseLayout.BljlGf8n.css"><style>.cookie-data-delete-action.svelte-1nb1j79{--cookie-delete-red: 0 84% 60%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;border:1px solid hsl(var(--cookie-delete-red) / .18);border-radius:18px;padding:12px;background:hsl(var(--background) / .68)}.cookie-data-delete-action__copy.svelte-1nb1j79{display:grid;gap:7px;min-width:0}.cookie-data-delete-action__copy.svelte-1nb1j79 p:where(.svelte-1nb1j79){margin:0;color:hsl(var(--muted-foreground));font-size:.9rem;line-height:1.45}.cookie-data-delete-action__copy.svelte-1nb1j79 .cookie-data-delete-action__status:where(.svelte-1nb1j79){color:hsl(var(--foreground));font-weight:750}.cookie-data-delete-action__copy.svelte-1nb1j79 .cookie-data-delete-action__status.error:where(.svelte-1nb1j79){color:hsl(var(--cookie-delete-red))}.cookie-data-delete-action__button.svelte-1nb1j79{display:inline-flex;position:relative;min-height:46px;max-width:100%;align-items:center;justify-content:center;gap:9px;border:1px solid hsl(var(--cookie-delete-red) / .38);border-radius:16px;padding:0 16px;background:hsl(var(--cookie-delete-red) / .08);color:hsl(var(--cookie-delete-red));font:inherit;font-weight:820;line-height:1;white-space:nowrap;cursor:pointer;transition:transform .16s ease,border-color .16s ease,background-color .16s ease}.cookie-data-delete-action__button.svelte-1nb1j79:hover{border-color:hsl(var(--cookie-delete-red) / .56);background:hsl(var(--cookie-delete-red) / .12);transform:translateY(-1px)}.cookie-data-delete-action__button.svelte-1nb1j79:focus-visible{outline:3px solid hsl(var(--cookie-delete-red) / .22);outline-offset:3px}.cookie-data-delete-action__button.svelte-1nb1j79:disabled{cursor:progress;opacity:.68;transform:none}@media(max-width:720px){.cookie-data-delete-action.svelte-1nb1j79{grid-template-columns:1fr}.cookie-data-delete-action__button.svelte-1nb1j79{width:100%}}
+</style><style id="svelte-dvvz9u">.twoluv-consent-banner.svelte-dvvz9u {position:fixed;z-index:80;right:max(16px, env(safe-area-inset-right));bottom:max(16px, env(safe-area-inset-bottom));left:max(16px, env(safe-area-inset-left));display:grid;grid-template-columns:auto minmax(0, 1fr) auto;gap:14px;align-items:center;max-width:980px;margin:0 auto;border:1px solid hsl(var(--border));border-radius:20px;padding:16px;background:hsl(var(--card) / 0.96);color:hsl(var(--foreground));box-shadow:0 22px 70px hsl(var(--foreground) / 0.16);backdrop-filter:blur(18px);}
+
+  @media (max-width: 1023px) {.twoluv-consent-banner.svelte-dvvz9u {font-family:"Inter Fallback", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;}
+  }.twoluv-consent-banner__icon.svelte-dvvz9u {display:grid;width:42px;height:42px;place-items:center;border-radius:50%;background:hsl(var(--primary) / 0.14);color:hsl(var(--primary));}.twoluv-consent-banner__copy.svelte-dvvz9u {display:grid;gap:4px;min-width:0;}.twoluv-consent-banner.svelte-dvvz9u strong:where(.svelte-dvvz9u),
+  .twoluv-consent-category.svelte-dvvz9u strong:where(.svelte-dvvz9u) {font-size:0.98rem;line-height:1.25;}.twoluv-consent-banner.svelte-dvvz9u p:where(.svelte-dvvz9u),
+  .twoluv-consent-category.svelte-dvvz9u p:where(.svelte-dvvz9u),
+  .twoluv-consent-dialog__description.svelte-dvvz9u,
+  .twoluv-consent-legal-links.svelte-dvvz9u {margin:0;color:hsl(var(--muted-foreground));font-size:0.9rem;line-height:1.5;}.twoluv-consent-legal-links.svelte-dvvz9u {max-width:62ch;}.twoluv-consent-sr-only.svelte-dvvz9u {position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}.twoluv-consent-legal-links.svelte-dvvz9u a:where(.svelte-dvvz9u) {color:hsl(var(--primary));font-weight:800;text-decoration:underline;text-decoration-thickness:0.08em;text-underline-offset:0.18em;}.twoluv-consent-legal-links.svelte-dvvz9u a:where(.svelte-dvvz9u):hover {color:hsl(var(--foreground));}.twoluv-consent-banner__actions.svelte-dvvz9u,
+  .twoluv-consent-dialog__footer.svelte-dvvz9u {display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;}.twoluv-consent-button.svelte-dvvz9u,
+  .twoluv-consent-toggle.svelte-dvvz9u {display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid hsl(var(--border));border-radius:999px;min-height:42px;padding:0 16px;background:hsl(var(--card));color:hsl(var(--foreground));font:inherit;font-weight:700;cursor:pointer;}.twoluv-consent-button.primary.svelte-dvvz9u {border-color:hsl(var(--primary));background:hsl(var(--primary));color:hsl(230 15% 12%);}.twoluv-consent-button.ghost.svelte-dvvz9u {background:hsl(var(--background) / 0.72);}.twoluv-consent-button.svelte-dvvz9u:disabled {cursor:progress;opacity:0.65;}.twoluv-consent-modal.svelte-dvvz9u {position:fixed;z-index:90;inset:0;display:grid;place-items:end center;padding:18px;background:hsl(var(--foreground) / 0.32);}.twoluv-consent-dialog.svelte-dvvz9u {display:grid;gap:18px;width:min(720px, 100%);max-height:min(760px, calc(100vh - 36px));overflow:auto;border:1px solid hsl(var(--border));border-radius:22px;padding:clamp(18px, 4vw, 26px);background:hsl(var(--card));color:hsl(var(--foreground));box-shadow:0 24px 80px hsl(var(--foreground) / 0.24);}.twoluv-consent-dialog__header.svelte-dvvz9u {display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}.twoluv-consent-dialog__header-actions.svelte-dvvz9u {display:inline-flex;flex:0 0 auto;align-items:center;gap:8px;}.twoluv-consent-dialog__header.svelte-dvvz9u p:where(.svelte-dvvz9u) {margin:0 0 4px;color:hsl(var(--primary));font-size:0.76rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;}.twoluv-consent-dialog.svelte-dvvz9u h2:where(.svelte-dvvz9u) {margin:0;font-family:var(--font-serif);font-size:clamp(1.55rem, 5vw, 2.35rem);line-height:1.05;letter-spacing:0;}.twoluv-consent-back-button.svelte-dvvz9u {display:inline-flex;min-height:42px;align-items:center;justify-content:center;gap:7px;border:1px solid hsl(var(--border));border-radius:999px;padding:0 13px;background:hsl(var(--background) / 0.72);color:hsl(var(--foreground));font:inherit;font-weight:750;cursor:pointer;}.twoluv-consent-categories.svelte-dvvz9u {display:grid;gap:10px;}.twoluv-consent-category.svelte-dvvz9u {display:block;overflow:hidden;border:1px solid hsl(var(--border));border-radius:16px;background:hsl(var(--background) / 0.58);transition:border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;}.twoluv-consent-category.expanded.svelte-dvvz9u {background:hsl(var(--card) / 0.92);}.twoluv-consent-category__summary.svelte-dvvz9u {display:grid;grid-template-columns:minmax(0, 1fr) auto;gap:12px;align-items:center;padding:14px;}.twoluv-consent-description-trigger.svelte-dvvz9u {display:inline-flex;min-width:0;align-items:center;justify-content:space-between;gap:10px;border:0;padding:0;background:transparent;color:hsl(var(--foreground));font:inherit;text-align:left;cursor:pointer;}.twoluv-consent-description-trigger.svelte-dvvz9u:focus-visible {border-radius:10px;outline:3px solid hsl(var(--ring) / 0.32);outline-offset:4px;}.twoluv-consent-category__description.svelte-dvvz9u {border-top:1px solid hsl(var(--border));padding:12px 14px 14px;}.twoluv-consent-category.attention.svelte-dvvz9u {border-color:hsl(var(--primary));background:hsl(var(--primary) / 0.08);box-shadow:0 0 0 4px hsl(var(--primary) / 0.15);}.twoluv-consent-category.attention.svelte-dvvz9u .twoluv-consent-toggle:where(.svelte-dvvz9u) {box-shadow:0 0 0 4px hsl(var(--primary) / 0.18);}.twoluv-consent-status.svelte-dvvz9u {border-radius:999px;padding:7px 10px;background:hsl(var(--muted));color:hsl(var(--muted-foreground));font-size:0.82rem;font-weight:800;white-space:nowrap;}.twoluv-consent-toggle.svelte-dvvz9u {position:relative;width:46px;min-width:46px;height:26px;min-height:26px;gap:0;border-color:hsl(var(--border));background:hsl(var(--muted));padding:0;box-shadow:inset 0 0 0 1px hsl(var(--foreground) / 0.02);}.twoluv-consent-toggle.active.svelte-dvvz9u {border-color:hsl(var(--primary));background:hsl(var(--primary));}.twoluv-consent-toggle.svelte-dvvz9u:focus-visible {outline:3px solid hsl(var(--ring) / 0.32);outline-offset:2px;}.twoluv-consent-toggle__thumb.svelte-dvvz9u {position:absolute;left:3px;width:20px;height:20px;border-radius:999px;background:hsl(var(--background));box-shadow:0 1px 4px hsl(var(--foreground) / 0.22);transition:transform 160ms ease;}.twoluv-consent-toggle.active.svelte-dvvz9u .twoluv-consent-toggle__thumb:where(.svelte-dvvz9u) {transform:translateX(20px);}
+
+  @media (prefers-reduced-motion: no-preference) {.twoluv-consent-category.attention.svelte-dvvz9u {
+      animation: svelte-dvvz9u-twoluv-consent-category-pulse 1.3s ease-in-out 2;}
+  }
+
+  @keyframes svelte-dvvz9u-twoluv-consent-category-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 4px hsl(var(--primary) / 0.15);
+    }
+
+    50% {
+      box-shadow: 0 0 0 8px hsl(var(--primary) / 0.22);
+    }
+  }
+
+  @media (max-width: 720px) {.twoluv-consent-banner.svelte-dvvz9u {grid-template-columns:auto minmax(0, 1fr);align-items:start;}.twoluv-consent-banner__actions.svelte-dvvz9u {grid-column:1 / -1;display:grid;grid-template-columns:1fr;justify-content:stretch;}.twoluv-consent-button.svelte-dvvz9u {width:100%;min-width:0;flex:none;}.twoluv-consent-button.svelte-dvvz9u span:where(.svelte-dvvz9u) {white-space:nowrap;}.twoluv-consent-modal.svelte-dvvz9u {align-items:end;padding:10px;}.twoluv-consent-dialog.svelte-dvvz9u {max-height:min(760px, calc(100vh - 20px));border-radius:18px;}.twoluv-consent-dialog__header.svelte-dvvz9u {gap:12px;}.twoluv-consent-category.svelte-dvvz9u {display:block;padding:0;}.twoluv-consent-category__summary.svelte-dvvz9u {padding:12px;}.twoluv-consent-toggle.svelte-dvvz9u {width:auto;min-width:46px;justify-self:end;}.twoluv-consent-status.svelte-dvvz9u {justify-self:end;}
+  }</style></head> <body class="" data-astro-cid-37fxchfa="">  <a class="lv2-skip" href="/en/cookies#main-content" data-astro-cid-mgyzpahm="">Skip to content</a> <header data-lv2-header="" class="lv2-header is-solid" aria-hidden="false" data-astro-cid-mgyzpahm=""> <div class="lv2-header-inner" data-astro-cid-mgyzpahm=""> <a class="lv2-logo-link" href="/en" aria-label="2Luv" data-astro-cid-mgyzpahm=""> <img src="/icons/logo-optimized/logo-small.webp" width="96" height="36" alt="2Luv" data-astro-cid-mgyzpahm=""> </a> <nav class="lv2-nav" aria-label="Primary" data-astro-cid-mgyzpahm=""> <a href="/en/about" data-astro-cid-mgyzpahm="">About</a><a href="/en#howitworks-section" data-astro-cid-mgyzpahm="">How It Works</a><a href="/en#pricing" data-astro-cid-mgyzpahm="">Pricing</a><a href="/en/blog" data-astro-cid-mgyzpahm="">Blog</a><a href="/en/contact" data-astro-cid-mgyzpahm="">Contact</a> </nav> <button data-menu-button="" class="lv2-menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-navigation-drawer" data-astro-cid-mgyzpahm=""> <svg data-menu-icon-open="" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-mgyzpahm=""><path d="M4 6h16M4 12h16M4 18h16" data-astro-cid-mgyzpahm=""></path></svg> <svg data-menu-icon-close="" class="lv2-icon-hidden" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-mgyzpahm=""><path d="M18 6 6 18M6 6l12 12" data-astro-cid-mgyzpahm=""></path></svg> </button> </div> </header> <div id="mobile-navigation-drawer" data-menu-panel="" class="lv2-menu-panel" role="menu" aria-label="Primary" hidden="" data-astro-cid-mgyzpahm=""> <div class="lv2-drawer-stack" data-astro-cid-mgyzpahm=""> <div class="lv2-drawer-ctas" data-astro-cid-mgyzpahm=""> <a class="lv2-drawer-search" href="/en/my-gifts" data-close-drawer="" toolname="open_my_gifts" tooldescription="Open the 2luv gift lookup page so the user can find their letters from this device or email flow." toolaction="Navigate to the localized My Gifts page." data-astro-cid-mgyzpahm=""> <svg viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-mgyzpahm=""><path d="m21 21-4.3-4.3" data-astro-cid-mgyzpahm=""></path><circle cx="11" cy="11" r="7" data-astro-cid-mgyzpahm=""></circle></svg> <span data-astro-cid-mgyzpahm="">Find my letter</span> </a> <a class="lv2-drawer-create" href="/en/create/love-letter" data-close-drawer="" toolname="start_love_letter_draft" tooldescription="Open the 2luv love letter creator from the mobile drawer. The user reviews all details before saving, checkout, or sharing." toolaction="Open the creator for a new user-reviewed digital love letter." data-astro-cid-mgyzpahm="">Create</a> </div> <div class="lv2-controls" aria-label="Preferences" data-astro-cid-mgyzpahm=""> <label class="lv2-control lv2-control-wide" data-astro-cid-mgyzpahm=""> <svg class="lv2-control-icon" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-mgyzpahm=""><circle cx="12" cy="12" r="10" data-astro-cid-mgyzpahm=""></circle><path d="M2 12h20" data-astro-cid-mgyzpahm=""></path><path d="M12 2a15 15 0 0 1 0 20" data-astro-cid-mgyzpahm=""></path><path d="M12 2a15 15 0 0 0 0 20" data-astro-cid-mgyzpahm=""></path></svg> <span class="lv2-control-label" data-astro-cid-mgyzpahm="">Language</span> <span class="lv2-control-value" aria-hidden="true" data-astro-cid-mgyzpahm="">English</span> <select class="lv2-control-select" data-header-locale="" aria-label="Language" data-astro-cid-mgyzpahm=""> <option value="en" selected="" data-astro-cid-mgyzpahm="">English</option><option value="pt" data-astro-cid-mgyzpahm="">Português</option><option value="es" data-astro-cid-mgyzpahm="">Español</option><option value="fr" data-astro-cid-mgyzpahm="">Français</option><option value="de" data-astro-cid-mgyzpahm="">Deutsch</option><option value="zh" data-astro-cid-mgyzpahm="">中文</option><option value="zh-tw" data-astro-cid-mgyzpahm="">中文 (繁體)</option><option value="ar" data-astro-cid-mgyzpahm="">العربية</option><option value="ms" data-astro-cid-mgyzpahm="">Bahasa Melayu</option><option value="ja" data-astro-cid-mgyzpahm="">日本語</option><option value="ru" data-astro-cid-mgyzpahm="">Русский</option><option value="ko" data-astro-cid-mgyzpahm="">한국어</option> </select> </label> <label class="lv2-control" data-astro-cid-mgyzpahm=""> <svg class="lv2-control-icon" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-mgyzpahm=""><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6" data-astro-cid-mgyzpahm=""></path></svg> <span class="lv2-control-label" data-astro-cid-mgyzpahm="">Currency</span> <span class="lv2-control-value" aria-hidden="true" data-astro-cid-mgyzpahm="">$ USD</span> <select class="lv2-control-select" data-header-region="" aria-label="Currency" data-astro-cid-mgyzpahm=""> <option value="PH" data-astro-cid-mgyzpahm="">₱ PHP</option><option value="ID" data-astro-cid-mgyzpahm="">Rp IDR</option><option value="MY" data-astro-cid-mgyzpahm="">RM MYR</option><option value="SG" data-astro-cid-mgyzpahm="">S$ SGD</option><option value="VN" data-astro-cid-mgyzpahm="">₫ VND</option><option value="TH" data-astro-cid-mgyzpahm="">฿ THB</option><option value="MM" data-astro-cid-mgyzpahm="">K MMK</option><option value="IN" data-astro-cid-mgyzpahm="">₹ INR</option><option value="PK" data-astro-cid-mgyzpahm="">Rs PKR</option><option value="BD" data-astro-cid-mgyzpahm="">৳ BDT</option><option value="NP" data-astro-cid-mgyzpahm="">Rs NPR</option><option value="BR" data-astro-cid-mgyzpahm="">R$ BRL</option><option value="MX" data-astro-cid-mgyzpahm="">MX$ MXN</option><option value="AR" data-astro-cid-mgyzpahm="">AR$ ARS</option><option value="CO" data-astro-cid-mgyzpahm="">COL$ COP</option><option value="PE" data-astro-cid-mgyzpahm="">S/ PEN</option><option value="CL" data-astro-cid-mgyzpahm="">CLP$ CLP</option><option value="GT" data-astro-cid-mgyzpahm="">Q GTQ</option><option value="BO" data-astro-cid-mgyzpahm="">Bs BOB</option><option value="CR" data-astro-cid-mgyzpahm="">₡ CRC</option><option value="HN" data-astro-cid-mgyzpahm="">L HNL</option><option value="EG" data-astro-cid-mgyzpahm="">E£ EGP</option><option value="SA" data-astro-cid-mgyzpahm="">SR SAR</option><option value="AE" data-astro-cid-mgyzpahm="">د.إ AED</option><option value="DZ" data-astro-cid-mgyzpahm="">DA DZD</option><option value="MA" data-astro-cid-mgyzpahm="">MAD MAD</option><option value="US" selected="" data-astro-cid-mgyzpahm="">$ USD</option><option value="CA" data-astro-cid-mgyzpahm="">CA$ CAD</option><option value="GB" data-astro-cid-mgyzpahm="">£ GBP</option><option value="EU" data-astro-cid-mgyzpahm="">€ EUR</option><option value="TR" data-astro-cid-mgyzpahm="">₺ TRY</option><option value="AU" data-astro-cid-mgyzpahm="">A$ AUD</option><option value="JP" data-astro-cid-mgyzpahm="">¥ JPY</option><option value="KR" data-astro-cid-mgyzpahm="">₩ KRW</option><option value="HK" data-astro-cid-mgyzpahm="">HK$ HKD</option><option value="ZA" data-astro-cid-mgyzpahm="">R ZAR</option><option value="NG" data-astro-cid-mgyzpahm="">₦ NGN</option><option value="KE" data-astro-cid-mgyzpahm="">KSh KES</option> </select> </label> <button type="button" class="lv2-theme-toggle" aria-label="Theme: System. Switch to Light." title="Theme: System. Switch to Light." data-theme-toggle="" data-astro-cid-mgyzpahm=""> <svg data-theme-icon="system" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-mgyzpahm=""><rect x="3" y="4" width="18" height="12" rx="2" data-astro-cid-mgyzpahm=""></rect><path d="M8 20h8M12 16v4" data-astro-cid-mgyzpahm=""></path></svg> <svg data-theme-icon="moon" class="lv2-icon-hidden" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-mgyzpahm=""><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" data-astro-cid-mgyzpahm=""></path></svg> <svg data-theme-icon="sun" class="lv2-icon-hidden" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-mgyzpahm=""><circle cx="12" cy="12" r="4" data-astro-cid-mgyzpahm=""></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" data-astro-cid-mgyzpahm=""></path></svg> </button> </div> <nav class="lv2-drawer-nav" aria-label="Primary" data-astro-cid-mgyzpahm="">  <ul data-astro-cid-mgyzpahm=""> <li data-astro-cid-mgyzpahm=""> <a href="/en/about" data-close-drawer="" data-astro-cid-mgyzpahm="">About</a> </li><li data-astro-cid-mgyzpahm=""> <a href="/en#howitworks-section" data-close-drawer="" data-astro-cid-mgyzpahm="">How It Works</a> </li><li data-astro-cid-mgyzpahm=""> <a href="/en#pricing" data-close-drawer="" data-astro-cid-mgyzpahm="">Pricing</a> </li><li data-astro-cid-mgyzpahm=""> <a href="/en/blog" data-close-drawer="" data-astro-cid-mgyzpahm="">Blog</a> </li><li data-astro-cid-mgyzpahm=""> <a href="/en/contact" data-close-drawer="" data-astro-cid-mgyzpahm="">Contact</a> </li> </ul> </nav> </div> </div> <script type="application/json" id="lv2-header-config">{"locale":"en","region":"US","openMenu":"Open menu","closeMenu":"Close menu","supportedLocales":["en","pt","es","fr","de","zh","zh-tw","ar","ms","ja","ru","ko"],"localePaths":{"en":"/en/cookies","pt":"/pt/cookies","es":"/es/cookies","fr":"/fr/cookies","de":"/de/cookies","zh":"/zh/cookies","zh-tw":"/zh-tw/cookies","ar":"/ar/cookies","ms":"/ms/cookies","ja":"/ja/cookies","ru":"/ru/cookies","ko":"/ko/cookies"},"themeLabels":{"system":"System","light":"Light","dark":"Dark"},"themeStateTemplate":"Theme: {current}. Switch to {next}.","activeRegions":["PH","ID","MY","SG","VN","TH","MM","IN","PK","BD","NP","BR","MX","AR","CO","PE","CL","GT","BO","CR","HN","EG","SA","AE","DZ","MA","US","CA","GB","EU","TR","AU","JP","KR","HK","ZA","NG","KE"]}</script> <script type="module" src="/_astro/HeaderV2.astro_astro_type_script_index_0_lang.DR0fOeQ1.js"></script><main id="main-content" tabindex="-1" class="page-shell page-shell-standard-nav" data-astro-cid-37fxchfa="">   <div class="blog-breadcrumb-shell" data-astro-cid-qaanghzh=""> <nav class="blog-breadcrumb" aria-label="Breadcrumb" data-astro-cid-qaanghzh=""> <ol data-astro-cid-qaanghzh=""> <li class="breadcrumb-item" data-astro-cid-qaanghzh=""> <a class="breadcrumb-link breadcrumb-home-link" href="/en" aria-label="Home" title="Home" data-astro-cid-qaanghzh=""> <svg viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-qaanghzh=""> <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" data-astro-cid-qaanghzh=""></path> <path d="M3 10a2 2 0 0 1 .7-1.5l7-6a2 2 0 0 1 2.6 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" data-astro-cid-qaanghzh=""></path> </svg> </a> </li> <li class="breadcrumb-separator" aria-hidden="true" data-astro-cid-qaanghzh=""> <span data-astro-cid-qaanghzh="">/</span> </li><li class="breadcrumb-item" data-astro-cid-qaanghzh=""> <span class="breadcrumb-page" role="link" aria-disabled="true" aria-current="page" data-astro-cid-qaanghzh=""> Cookie Policy — Consent &amp; Preferences </span> </li>  </ol> </nav> </div> <section class="hero legal-hero" data-astro-cid-ub2snsm6=""> <p data-astro-cid-ub2snsm6="">2luv</p> <h1 data-astro-cid-ub2snsm6="">Cookie Policy — Consent &amp; Preferences</h1> <p data-astro-cid-ub2snsm6="">Learn how we use cookies, what types exist, and how you can manage your consent.</p> <p class="last-updated" data-astro-cid-ub2snsm6=""> Last updated: <strong data-astro-cid-ub2snsm6="">January 2, 2026</strong> </p> <div class="cookie-actions-panel" data-astro-cid-ub2snsm6=""> <button class="manage-cookies-button" type="button" data-2luv-open-cookie-preferences="" data-astro-cid-ub2snsm6=""> <span class="manage-cookies-button__icon" aria-hidden="true" data-astro-cid-ub2snsm6=""></span> <span data-astro-cid-ub2snsm6="">Manage cookies</span> </button> <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).only=e;window.dispatchEvent(new Event("astro:only"));})();</script><script>(()=>{var g=Object.defineProperty;var w=(c,s,d)=>s in c?g(c,s,{enumerable:!0,configurable:!0,writable:!0,value:d}):c[s]=d;var l=(c,s,d)=>w(c,typeof s!="symbol"?s+"":s,d);var E=new Set(["__proto__","constructor","prototype"]);{let c={0:t=>y(t),1:t=>d(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(d(t)),5:t=>new Set(d(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>Number.POSITIVE_INFINITY*t},s=t=>{let[p,e]=t;return p in c?c[p](e):void 0},d=t=>t.map(s),y=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([p,e])=>[p,s(e)]));class f extends HTMLElement{constructor(){super(...arguments);l(this,"Component");l(this,"hydrator");l(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let n=this.querySelectorAll("astro-slot"),r={},i=this.querySelectorAll("template[data-astro-template]");for(let o of i){let a=o.closest(this.tagName);a!=null&&a.isSameNode(this)&&(r[o.getAttribute("data-astro-template")||"default"]=o.innerHTML,o.remove())}for(let o of n){let a=o.closest(this.tagName);a!=null&&a.isSameNode(this)&&(r[o.getAttribute("name")||"default"]=o.innerHTML)}let u;try{u=this.hasAttribute("props")?y(JSON.parse(this.getAttribute("props"))):{}}catch(o){let a=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&&(a+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${a}`,this.getAttribute("props"),o),o}let h;await this.hydrator(this)(this.Component,u,r,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});l(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),n.disconnect(),this.childrenConnectedCallback()},n=new MutationObserver(()=>{var r;((r=this.lastChild)==null?void 0:r.nodeType)===Node.COMMENT_NODE&&this.lastChild.nodeValue==="astro:end"&&(this.lastChild.remove(),e())});n.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&&await import(e),this.start()}getRetryImportUrl(e){let n=new URL(e,document.baseURI),r=`astro-retry=${Date.now()}`,i=n.hash.replace(/^#/,"");return n.hash=i?`${i}&${r}`:r,n.toString()}async importWithRetry(e){try{return await import(e)}catch(n){return await new Promise(r=>setTimeout(r,1e3)),import(this.getRetryImportUrl(e))}}handleHydrationError(e){let n=this.getAttribute("component-url"),r=new CustomEvent("astro:hydration-error",{cancelable:!0,bubbles:!0,composed:!0,detail:{error:e,componentUrl:n}});this.dispatchEvent(r)&&console.error(`[astro-island] Error hydrating ${n}`,e)}async start(){let e=JSON.parse(this.getAttribute("opts")),n=this.getAttribute("client");if(Astro[n]===void 0){window.addEventListener(`astro:${n}`,()=>this.start(),{once:!0});return}try{await Astro[n](async()=>{let r=this.getAttribute("renderer-url");try{let[i,{default:u}]=await Promise.all([this.importWithRetry(this.getAttribute("component-url")),r?this.importWithRetry(r):Promise.resolve({default:()=>()=>{}})]),h=this.getAttribute("component-export")||"default";if(h.includes(".")){this.Component=i;for(let m of h.split(".")){if(E.has(m)||!this.Component||typeof this.Component!="object"&&typeof this.Component!="function"||!Object.hasOwn(this.Component,m))throw new Error(`Invalid component export path: ${h}`);this.Component=this.Component[m]}}else{if(E.has(h))throw new Error(`Invalid component export path: ${h}`);this.Component=i[h]}return this.hydrator=u,this.hydrate}catch(i){return this.handleHydrationError(i),()=>{}}},e,this)}catch(r){this.handleHydrationError(r)}}attributeChangedCallback(){this.hydrate()}}l(f,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",f)}})();</script><astro-island uid="koMgW" component-url="/_astro/CookieDataDeleteAction.C8NU8bmT.js" component-export="default" renderer-url="/_astro/client.svelte.3OL52h21.js" props="{&quot;label&quot;:[0,&quot;Delete this device data&quot;],&quot;description&quot;:[0,&quot;Deletes cookies, drafts, local media previews and access data stored by 2luv in this browser.&quot;],&quot;confirmMessage&quot;:[0,&quot;Delete cookies, drafts, local media previews and access data from this device?&quot;],&quot;workingLabel&quot;:[0,&quot;Deleting data...&quot;],&quot;successMessage&quot;:[0,&quot;Browsing data deleted from this device.&quot;],&quot;errorMessage&quot;:[0,&quot;We could not delete all browsing data. Try again or clear data in your browser settings.&quot;],&quot;data-astro-cid-ub2snsm6&quot;:[0,true]}" client="only" opts="{&quot;name&quot;:&quot;CookieDataDeleteAction&quot;,&quot;value&quot;:&quot;svelte&quot;}"><section class="cookie-data-delete-action svelte-1nb1j79" aria-label="Delete this device data"><div class="cookie-data-delete-action__copy svelte-1nb1j79"><p class="svelte-1nb1j79">Deletes cookies, drafts, local media previews and access data stored by 2luv in this browser.</p> <!----></div> <button type="button" class="cookie-data-delete-action__button svelte-1nb1j79"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="lucide-icon lucide lucide-trash-2"><!----><path d="M10 11v6"></path><!----><path d="M14 11v6"></path><!----><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><!----><path d="M3 6h18"></path><!----><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><!----><!----><!----></svg><!----> <span>Delete this device data</span></button></section></astro-island> <aside class="legal-print-cta" aria-label="Download complete PDF document" data-astro-cid-cr7ufytq=""> <a class="legal-print-button" href="https://api.2-luv.com/api/legal-document.pdf?lang=en" download="2luv-complete-legal-and-privacy-document-en.pdf" data-astro-cid-cr7ufytq=""> <svg viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-cr7ufytq=""> <path d="M6 9V2h12v7" data-astro-cid-cr7ufytq=""></path> <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" data-astro-cid-cr7ufytq=""></path> <path d="M6 14h12v8H6z" data-astro-cid-cr7ufytq=""></path> <path d="M8 18h8" data-astro-cid-cr7ufytq=""></path> </svg> <span data-astro-cid-cr7ufytq="">Download complete PDF document</span> </a> <p data-astro-cid-cr7ufytq="">Generates a complete print-ready version with Terms, Privacy, Cookies and Copyright.</p> </aside> </div> </section> <article class="legal-card" aria-labelledby="cookies-policy-title" data-astro-cid-ub2snsm6=""> <h2 id="cookies-policy-title" class="sr-only" data-astro-cid-ub2snsm6="">Cookie Policy — Consent &amp; Preferences</h2> <section class="legal-section" aria-labelledby="cookies-what" data-astro-cid-ub2snsm6=""> <h3 id="cookies-what" data-astro-cid-ub2snsm6="">1. What cookies are and how we use them</h3> <div class="paragraphs" data-astro-cid-ub2snsm6=""> <p data-astro-cid-ub2snsm6="">Cookies are small text files stored by your browser when you visit a website. They help remember preferences, keep essential features working, and—when you allow it—measure performance and campaign effectiveness.</p><p data-astro-cid-ub2snsm6="">At 2luv, we use cookies mainly to: (a) remember your consent, (b) provide features and security on some pages (e.g., password-protected content), and (c) when authorized, measure usage and conversions.</p> </div> </section><section class="legal-section" aria-labelledby="cookies-types" data-astro-cid-ub2snsm6=""> <h3 id="cookies-types" data-astro-cid-ub2snsm6="">2. Types of cookies used and purpose</h3> <div class="paragraphs" data-astro-cid-ub2snsm6=""> <p data-astro-cid-ub2snsm6="">Necessary: essential for security and basic functionality (e.g., remembering consent and authenticating protected content).</p><p data-astro-cid-ub2snsm6="">Functional: improve your experience and help navigation (e.g., remembering the last accessed content).</p><p data-astro-cid-ub2snsm6="">Preferences: store choices like language.</p><p data-astro-cid-ub2snsm6="">Analytics: help measure and understand site usage (statistics), when enabled.</p><p data-astro-cid-ub2snsm6="">Marketing: help measure campaigns and conversions, when enabled.</p> </div> </section><section class="legal-section" aria-labelledby="cookies-consent" data-astro-cid-ub2snsm6=""> <h3 id="cookies-consent" data-astro-cid-ub2snsm6="">3. How we collect your consent and how long it is stored</h3> <div class="paragraphs" data-astro-cid-ub2snsm6=""> <p data-astro-cid-ub2snsm6="">When you access 2luv, we show a cookie banner so you can accept, reject, or customize your preferences (e.g., Analytics and Marketing).</p><p data-astro-cid-ub2snsm6="">Your choice is stored so we can respect it on future visits. In general, we keep the record for up to 12 months (it may vary depending on browser settings). In some cases, we also use the browser's localStorage to store preferences.</p> </div> </section><section class="legal-section" aria-labelledby="cookies-refuse" data-astro-cid-ub2snsm6=""> <h3 id="cookies-refuse" data-astro-cid-ub2snsm6="">4. How you can refuse cookies</h3> <div class="paragraphs" data-astro-cid-ub2snsm6=""> <p data-astro-cid-ub2snsm6="">You can refuse optional cookies directly in the banner by clicking Reject or by disabling categories in Customize.</p><p data-astro-cid-ub2snsm6="">You can also manage cookies in your browser settings (block, delete, or limit). If you delete cookies, some preferences may be reset.</p> </div> </section><section class="legal-section" aria-labelledby="cookies-table" data-astro-cid-ub2snsm6=""> <h3 id="cookies-table" data-astro-cid-ub2snsm6="">5. Which cookies are used</h3>  <div class="paragraphs" data-astro-cid-ub2snsm6=""> <p data-astro-cid-ub2snsm6="">The list below includes first-party cookies (set by 2luv) and cookies/identifiers that may be set by third-party services (Analytics/Ads). Some names and durations may vary depending on the provider and browser.</p> </div> <div class="table-shell" data-astro-cid-ub2snsm6=""> <table data-astro-cid-ub2snsm6=""> <caption data-astro-cid-ub2snsm6="">Relevant cookies and identifiers</caption> <thead data-astro-cid-ub2snsm6=""> <tr data-astro-cid-ub2snsm6=""> <th scope="col" data-astro-cid-ub2snsm6="">Technology</th> <th scope="col" data-astro-cid-ub2snsm6="">Category</th> <th scope="col" data-astro-cid-ub2snsm6="">Owner</th> <th scope="col" data-astro-cid-ub2snsm6="">Name</th> <th scope="col" data-astro-cid-ub2snsm6="">Purpose</th> <th scope="col" data-astro-cid-ub2snsm6="">Duration</th>    </tr> </thead> <tbody data-astro-cid-ub2snsm6=""> <tr data-astro-cid-ub2snsm6=""> <td class="nowrap" data-astro-cid-ub2snsm6="">Cookie</td> <td class="nowrap" data-astro-cid-ub2snsm6="">Necessary</td> <td class="nowrap" data-astro-cid-ub2snsm6="">2luv-ui</td> <td class="cookie-name" data-astro-cid-ub2snsm6=""> <span class="cookie-name-list" data-astro-cid-ub2snsm6=""> <span class="cookie-name-token" data-astro-cid-ub2snsm6=""> <code data-astro-cid-ub2snsm6="">cookie-consent</code>  </span> </span> </td> <td data-astro-cid-ub2snsm6="">Stores your consent choice (including Consent Mode preferences) so we can respect your selections in future visits.</td> <td class="nowrap" data-astro-cid-ub2snsm6="">12 months</td>    </tr><tr data-astro-cid-ub2snsm6=""> <td class="nowrap" data-astro-cid-ub2snsm6="">Cookie</td> <td class="nowrap" data-astro-cid-ub2snsm6="">Necessary</td> <td class="nowrap" data-astro-cid-ub2snsm6="">2luv-ui</td> <td class="cookie-name" data-astro-cid-ub2snsm6=""> <span class="cookie-name-list" data-astro-cid-ub2snsm6=""> <span class="cookie-name-token" data-astro-cid-ub2snsm6=""> <code data-astro-cid-ub2snsm6="">2luv-locale</code>  </span><span class="cookie-name-token is-legacy" data-astro-cid-ub2snsm6=""> <code data-astro-cid-ub2snsm6="">NEXT_LOCALE</code> <small data-astro-cid-ub2snsm6="">legacy fallback</small> </span> </span> </td> <td data-astro-cid-ub2snsm6="">Keeps the service in the correct language, date format and reading direction for this browser.</td> <td class="nowrap" data-astro-cid-ub2snsm6="">12 months</td>    </tr><tr data-astro-cid-ub2snsm6=""> <td class="nowrap" data-astro-cid-ub2snsm6="">Cookie</td> <td class="nowrap" data-astro-cid-ub2snsm6="">Necessary</td> <td class="nowrap" data-astro-cid-ub2snsm6="">2luv-ui</td> <td class="cookie-name" data-astro-cid-ub2snsm6=""> <span class="cookie-name-list" data-astro-cid-ub2snsm6=""> <span class="cookie-name-token" data-astro-cid-ub2snsm6=""> <code data-astro-cid-ub2snsm6="">2luv-region</code>  </span><span class="cookie-name-token" data-astro-cid-ub2snsm6=""> <code data-astro-cid-ub2snsm6="">user-region (legacy cleanup)</code>  </span> </span> </td> <td data-astro-cid-ub2snsm6="">Keeps pricing, currency, plan availability and regional routing consistent for this browser.</td> <td class="nowrap" data-astro-cid-ub2snsm6="">12 months</td>    </tr><tr data-astro-cid-ub2snsm6=""> <td class="nowrap" data-astro-cid-ub2snsm6="">Cookie</td> <td class="nowrap" data-astro-cid-ub2snsm6="">Functional</td> <td class="nowrap" data-astro-cid-ub2snsm6="">2luv-api</td> <td class="cookie-name" data-astro-cid-ub2snsm6=""> <span class="cookie-name-list" data-astro-cid-ub2snsm6=""> <span class="cookie-name-token" data-astro-cid-ub2snsm6=""> <code data-astro-cid-ub2snsm6="">created_gifts</code>  </span> </span> </td> <td data-astro-cid-ub2snsm6="">Helps remember gifts/letters created in this browser (e.g., quick recovery and navigation convenience).</td> <td class="nowrap" data-astro-cid-ub2snsm6="">180 days</td>    </tr><tr data-astro-cid-ub2snsm6=""> <td class="nowrap" data-astro-cid-ub2snsm6="">Cookie</td> <td class="nowrap" data-astro-cid-ub2snsm6="">Functional</td> <td class="nowrap" data-astro-cid-ub2snsm6="">2luv-api</td> <td class="cookie-name" data-astro-cid-ub2snsm6=""> <span class="cookie-name-list" data-astro-cid-ub2snsm6=""> <span class="cookie-name-token" data-astro-cid-ub2snsm6=""> <code data-astro-cid-ub2snsm6="">last_accessed_gift</code>  </span> </span> </td> <td data-astro-cid-ub2snsm6="">Helps quickly resume the last gift/letter accessed in this browser.</td> <td class="nowrap" data-astro-cid-ub2snsm6="">30 days</td>    </tr><tr data-astro-cid-ub2snsm6=""> <td class="nowrap" data-astro-cid-ub2snsm6="">Cookie</td> <td class="nowrap" data-astro-cid-ub2snsm6="">Necessary</td> <td class="nowrap" data-astro-cid-ub2snsm6="">2luv-api</td> <td class="cookie-name" data-astro-cid-ub2snsm6=""> <span class="cookie-name-list" data-astro-cid-ub2snsm6=""> <span class="cookie-name-token" data-astro-cid-ub2snsm6=""> <code data-astro-cid-ub2snsm6="">device_id</code>  </span> </span> </td> <td data-astro-cid-ub2snsm6="">Security cookie (httpOnly) used to identify the device/browser and help protect access and sensitive operations.</td> <td class="nowrap" data-astro-cid-ub2snsm6="">12 months</td>    </tr><tr data-astro-cid-ub2snsm6=""> <td class="nowrap" data-astro-cid-ub2snsm6="">Cookie</td> <td class="nowrap" data-astro-cid-ub2snsm6="">Necessary</td> <td class="nowrap" data-astro-cid-ub2snsm6="">2luv-api</td> <td class="cookie-name" data-astro-cid-ub2snsm6=""> <span class="cookie-name-list" data-astro-cid-ub2snsm6=""> <span class="cookie-name-token" data-astro-cid-ub2snsm6=""> <code data-astro-cid-ub2snsm6="">gift_auth_{giftId}</code>  </span> </span> </td> <td data-astro-cid-ub2snsm6="">Authentication cookie (httpOnly) used to keep access to password-protected letters and allow authorized actions related to that content.</td> <td class="nowrap" data-astro-cid-ub2snsm6="">30 days</td>    </tr><tr data-astro-cid-ub2snsm6=""> <td class="nowrap" data-astro-cid-ub2snsm6="">Cookie</td> <td class="nowrap" data-astro-cid-ub2snsm6="">Analytics</td> <td class="nowrap" data-astro-cid-ub2snsm6="">Google</td> <td class="cookie-name" data-astro-cid-ub2snsm6=""> <span class="cookie-name-list" data-astro-cid-ub2snsm6=""> <span class="cookie-name-token" data-astro-cid-ub2snsm6=""> <code data-astro-cid-ub2snsm6="">_ga</code>  </span><span class="cookie-name-token" data-astro-cid-ub2snsm6=""> <code data-astro-cid-ub2snsm6="">_ga_*</code>  </span> </span> </td> <td data-astro-cid-ub2snsm6="">Google Analytics: helps understand site usage (aggregated statistics), performance, and navigation, respecting Consent Mode.</td> <td class="nowrap" data-astro-cid-ub2snsm6="">up to 13 months</td>    </tr> </tbody> </table> </div>  </section><section class="legal-section" aria-labelledby="cookies-rights" data-astro-cid-ub2snsm6=""> <h3 id="cookies-rights" data-astro-cid-ub2snsm6="">6. How to exercise your rights</h3> <div class="paragraphs" data-astro-cid-ub2snsm6=""> <p data-astro-cid-ub2snsm6="">You can request information and exercise your privacy rights (for example: confirmation of processing, access, correction, anonymization, portability, deletion, and withdrawal of consent), when applicable, by contacting us.</p><p data-astro-cid-ub2snsm6="">Contact channel: contact@2-luv.com.</p> </div> </section><section class="legal-section" aria-labelledby="cookies-changes" data-astro-cid-ub2snsm6=""> <h3 id="cookies-changes" data-astro-cid-ub2snsm6="">7. Changes and modification date of the Cookie Policy</h3> <div class="paragraphs" data-astro-cid-ub2snsm6=""> <p data-astro-cid-ub2snsm6="">We may update this Cookie Policy to reflect changes in our services, technologies, or legal obligations. When there are relevant changes, we will update the “Last updated” date at the top of this page.</p> </div> </section> </article>  </main> <footer class="footer-v2" aria-label="2luv" data-astro-cid-y5jxqnse=""> <div class="footer-inner" data-astro-cid-y5jxqnse=""> <div class="footer-grid" data-astro-cid-y5jxqnse=""> <section class="footer-brand" aria-label="2luv" data-astro-cid-y5jxqnse=""> <a class="footer-logo" href="/en" aria-label="2luv" data-astro-cid-y5jxqnse=""> <picture data-astro-cid-y5jxqnse=""> <source type="image/webp" srcset="/icons/logo-optimized/logo-small.webp 1x, /icons/logo-optimized/logo-medium.webp 2x" data-astro-cid-y5jxqnse=""> <img src="/icons/logo-optimized/logo-small.webp" alt="2luv Logo" width="200" height="80" loading="lazy" decoding="async" data-astro-cid-y5jxqnse=""> </picture> </a> <p data-astro-cid-y5jxqnse="">Spreading love through unforgettable digital letters.</p> <div class="footer-socials" data-astro-cid-y5jxqnse=""> <a href="https://www.instagram.com/2luvletters/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" data-astro-cid-y5jxqnse=""> <svg viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-y5jxqnse=""><rect x="2" y="2" width="20" height="20" rx="5" data-astro-cid-y5jxqnse=""></rect><circle cx="12" cy="12" r="4" data-astro-cid-y5jxqnse=""></circle><path d="M17.5 6.5h.01" data-astro-cid-y5jxqnse=""></path></svg> </a> <a href="https://www.tiktok.com/@2luvletters" target="_blank" rel="noopener noreferrer" aria-label="TikTok" data-astro-cid-y5jxqnse=""> <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-astro-cid-y5jxqnse=""><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.3 0 .6.04.88.13V9.4a6.84 6.84 0 0 0-.88-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4c-.35 0-.7-.03-1.04-.1z" data-astro-cid-y5jxqnse=""></path></svg> </a> </div> <div class="footer-controls" aria-label="Preferences" data-footer-controls="" data-astro-cid-heatxjsd=""> <label class="footer-control footer-select-control" data-astro-cid-heatxjsd=""> <svg class="footer-control-icon" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-heatxjsd=""><circle cx="12" cy="12" r="10" data-astro-cid-heatxjsd=""></circle><path d="M2 12h20" data-astro-cid-heatxjsd=""></path><path d="M12 2a15 15 0 0 1 0 20" data-astro-cid-heatxjsd=""></path><path d="M12 2a15 15 0 0 0 0 20" data-astro-cid-heatxjsd=""></path></svg> <span class="footer-control-label" data-astro-cid-heatxjsd="">Language</span> <select data-footer-locale="" value="en" aria-label="Language" data-astro-cid-heatxjsd=""> <option value="en" selected="" data-astro-cid-heatxjsd="">English</option><option value="pt" data-astro-cid-heatxjsd="">Português</option><option value="es" data-astro-cid-heatxjsd="">Español</option><option value="fr" data-astro-cid-heatxjsd="">Français</option><option value="de" data-astro-cid-heatxjsd="">Deutsch</option><option value="zh" data-astro-cid-heatxjsd="">中文</option><option value="zh-tw" data-astro-cid-heatxjsd="">中文 (繁體)</option><option value="ar" data-astro-cid-heatxjsd="">العربية</option><option value="ms" data-astro-cid-heatxjsd="">Bahasa Melayu</option><option value="ja" data-astro-cid-heatxjsd="">日本語</option><option value="ru" data-astro-cid-heatxjsd="">Русский</option><option value="ko" data-astro-cid-heatxjsd="">한국어</option> </select> </label> <label class="footer-control footer-select-control" data-astro-cid-heatxjsd=""> <svg class="footer-control-icon" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-heatxjsd=""><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6" data-astro-cid-heatxjsd=""></path></svg> <span class="footer-control-label" data-astro-cid-heatxjsd="">Currency</span> <select data-footer-region="" value="US" aria-label="Currency" data-astro-cid-heatxjsd=""> <option value="PH" data-astro-cid-heatxjsd="">₱ PHP</option><option value="ID" data-astro-cid-heatxjsd="">Rp IDR</option><option value="MY" data-astro-cid-heatxjsd="">RM MYR</option><option value="SG" data-astro-cid-heatxjsd="">S$ SGD</option><option value="VN" data-astro-cid-heatxjsd="">₫ VND</option><option value="TH" data-astro-cid-heatxjsd="">฿ THB</option><option value="MM" data-astro-cid-heatxjsd="">K MMK</option><option value="IN" data-astro-cid-heatxjsd="">₹ INR</option><option value="PK" data-astro-cid-heatxjsd="">Rs PKR</option><option value="BD" data-astro-cid-heatxjsd="">৳ BDT</option><option value="NP" data-astro-cid-heatxjsd="">Rs NPR</option><option value="BR" data-astro-cid-heatxjsd="">R$ BRL</option><option value="MX" data-astro-cid-heatxjsd="">MX$ MXN</option><option value="AR" data-astro-cid-heatxjsd="">AR$ ARS</option><option value="CO" data-astro-cid-heatxjsd="">COL$ COP</option><option value="PE" data-astro-cid-heatxjsd="">S/ PEN</option><option value="CL" data-astro-cid-heatxjsd="">CLP$ CLP</option><option value="GT" data-astro-cid-heatxjsd="">Q GTQ</option><option value="BO" data-astro-cid-heatxjsd="">Bs BOB</option><option value="CR" data-astro-cid-heatxjsd="">₡ CRC</option><option value="HN" data-astro-cid-heatxjsd="">L HNL</option><option value="EG" data-astro-cid-heatxjsd="">E£ EGP</option><option value="SA" data-astro-cid-heatxjsd="">SR SAR</option><option value="AE" data-astro-cid-heatxjsd="">د.إ AED</option><option value="DZ" data-astro-cid-heatxjsd="">DA DZD</option><option value="MA" data-astro-cid-heatxjsd="">MAD MAD</option><option value="US" selected="" data-astro-cid-heatxjsd="">$ USD</option><option value="CA" data-astro-cid-heatxjsd="">CA$ CAD</option><option value="GB" data-astro-cid-heatxjsd="">£ GBP</option><option value="EU" data-astro-cid-heatxjsd="">€ EUR</option><option value="TR" data-astro-cid-heatxjsd="">₺ TRY</option><option value="AU" data-astro-cid-heatxjsd="">A$ AUD</option><option value="JP" data-astro-cid-heatxjsd="">¥ JPY</option><option value="KR" data-astro-cid-heatxjsd="">₩ KRW</option><option value="HK" data-astro-cid-heatxjsd="">HK$ HKD</option><option value="ZA" data-astro-cid-heatxjsd="">R ZAR</option><option value="NG" data-astro-cid-heatxjsd="">₦ NGN</option><option value="KE" data-astro-cid-heatxjsd="">KSh KES</option> </select> </label> <button class="footer-control footer-theme-control" type="button" data-footer-theme="" aria-label="Theme: System. Switch to Light." title="Theme: System. Switch to Light." data-astro-cid-heatxjsd=""> <svg class="footer-theme-system" data-footer-theme-icon="system" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-heatxjsd=""><rect x="3" y="4" width="18" height="12" rx="2" data-astro-cid-heatxjsd=""></rect><path d="M8 20h8M12 16v4" data-astro-cid-heatxjsd=""></path></svg> <svg class="footer-theme-moon footer-theme-icon-hidden" data-footer-theme-icon="dark" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-heatxjsd=""><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z" data-astro-cid-heatxjsd=""></path></svg> <svg class="footer-theme-sun footer-theme-icon-hidden" data-footer-theme-icon="light" viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-heatxjsd=""><circle cx="12" cy="12" r="4" data-astro-cid-heatxjsd=""></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" data-astro-cid-heatxjsd=""></path></svg> <span data-footer-theme-label="" data-astro-cid-heatxjsd="">System</span> </button> </div> <script type="application/json" id="lv2-footer-controls-config">{"supportedLocales":["en","pt","es","fr","de","zh","zh-tw","ar","ms","ja","ru","ko"],"regionCodes":["PH","ID","MY","SG","VN","TH","MM","IN","PK","BD","NP","BR","MX","AR","CO","PE","CL","GT","BO","CR","HN","EG","SA","AE","DZ","MA","US","CA","GB","EU","TR","AU","JP","KR","HK","ZA","NG","KE"],"themeLabels":{"system":"System","light":"Light","dark":"Dark"},"themeStateTemplate":"Theme: {current}. Switch to {next}."}</script> <script>
+  (() => {
+    const root = document.querySelector('[data-footer-controls]');
+    if (!root) return;
+    const configEl = document.getElementById('lv2-footer-controls-config');
+    const config = configEl ? JSON.parse(configEl.textContent || '{}') : {};
+
+    const setCookie = (name, value) => {
+      document.cookie = `${name}=${encodeURIComponent(value)};path=/;max-age=31536000;samesite=lax`;
+    };
+
+    const expireCookie = (name) => {
+      document.cookie = `${name}=;path=/;max-age=0;samesite=lax`;
+    };
+
+    const fallbackChangeLocale = (nextLocale) => {
+      if (!config.supportedLocales?.includes(nextLocale)) return;
+      setCookie('2luv-locale', nextLocale);
+      expireCookie('NEXT_LOCALE');
+      const parts = window.location.pathname.split('/');
+      if (config.supportedLocales.includes(parts[1])) {
+        parts[1] = nextLocale;
+        window.location.href = `${parts.join('/')}${window.location.search}${window.location.hash}`;
+        return;
+      }
+      window.location.href = `/${nextLocale}${window.location.pathname}${window.location.search}${window.location.hash}`;
+    };
+
+    const fallbackChangeRegion = (nextRegion) => {
+      if (!config.regionCodes?.includes(nextRegion)) return;
+      setCookie('2luv-region', nextRegion);
+      expireCookie('user-region');
+      const url = new URL(window.location.href);
+      url.searchParams.set('region', nextRegion);
+      window.location.assign(url.toString());
+    };
+
+    root.querySelector('[data-footer-locale]')?.addEventListener('change', (event) => {
+      const next = event.currentTarget.value;
+      if (window.__lv2Preferences?.changeLocale) window.__lv2Preferences.changeLocale(next);
+      else fallbackChangeLocale(next);
+    });
+
+    root.querySelector('[data-footer-region]')?.addEventListener('change', (event) => {
+      const next = event.currentTarget.value;
+      if (window.__lv2Preferences?.changeRegion) window.__lv2Preferences.changeRegion(next);
+      else fallbackChangeRegion(next);
+    });
+
+    const themeButton = root.querySelector('[data-footer-theme]');
+    const themeLabel = root.querySelector('[data-footer-theme-label]');
+    const themeIcons = {
+      system: root.querySelector('[data-footer-theme-icon="system"]'),
+      light: root.querySelector('[data-footer-theme-icon="light"]'),
+      dark: root.querySelector('[data-footer-theme-icon="dark"]')
+    };
+    const themeLabels = config.themeLabels || { system: 'System', light: 'Light', dark: 'Dark' };
+    const themeStateTemplate = config.themeStateTemplate || 'Theme: {current}. Switch to {next}.';
+    const themeOrder = ['system', 'light', 'dark'];
+    const media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    const normalizeTheme = (value) => themeOrder.includes(value) ? value : 'system';
+    const resolveTheme = (theme) => theme === 'system' && media?.matches ? 'dark' : theme === 'dark' ? 'dark' : 'light';
+    const readStoredTheme = () => {
+      try {
+        return normalizeTheme(window.localStorage.getItem('theme'));
+      } catch {
+        return 'system';
+      }
+    };
+    const getThemeState = () => {
+      const themeApi = window.__2luvTheme;
+      const theme = normalizeTheme(themeApi?.getTheme ? themeApi.getTheme() : readStoredTheme());
+      const resolvedTheme = themeApi?.getResolvedTheme ? themeApi.getResolvedTheme() : resolveTheme(theme);
+      return { theme, resolvedTheme, dark: resolvedTheme === 'dark' };
+    };
+    const applyFallbackTheme = (theme) => {
+      const normalizedTheme = normalizeTheme(theme);
+      const resolvedTheme = resolveTheme(normalizedTheme);
+      const dark = resolvedTheme === 'dark';
+      document.documentElement.classList.toggle('dark', dark);
+      document.documentElement.dataset.theme = normalizedTheme;
+      document.documentElement.dataset.resolvedTheme = resolvedTheme;
+      document.documentElement.style.colorScheme = resolvedTheme;
+      try {
+        window.localStorage.setItem('theme', normalizedTheme);
+      } catch {}
+      window.dispatchEvent(new CustomEvent('lv2:theme-change', {
+        detail: { theme: normalizedTheme, resolvedTheme, dark }
+      }));
+      return { theme: normalizedTheme, resolvedTheme, dark };
+    };
+    const nextTheme = (theme) => theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system';
+    const syncThemeControl = () => {
+      const state = getThemeState();
+      const currentLabel = themeLabels[state.theme] || themeLabels.system;
+      const nextLabel = themeLabels[nextTheme(state.theme)] || themeLabels.light;
+      if (themeLabel) themeLabel.textContent = currentLabel;
+      Object.entries(themeIcons).forEach(([theme, icon]) => {
+        icon?.classList.toggle('footer-theme-icon-hidden', theme !== state.theme);
+      });
+      const stateLabel = themeStateTemplate.replace('{current}', currentLabel).replace('{next}', nextLabel);
+      themeButton?.setAttribute('aria-label', stateLabel);
+      themeButton?.setAttribute('title', stateLabel);
+    };
+
+    syncThemeControl();
+    window.addEventListener('lv2:theme-change', syncThemeControl);
+
+    themeButton?.addEventListener('click', () => {
+      if (window.__lv2Preferences?.toggleTheme) {
+        window.__lv2Preferences.toggleTheme();
+        syncThemeControl();
+        return;
+      }
+      applyFallbackTheme(nextTheme(getThemeState().theme));
+      syncThemeControl();
+    });
+  })();
+</script> </section> <nav aria-label="Product" data-astro-cid-y5jxqnse=""> <h2 data-astro-cid-y5jxqnse="">Product</h2> <a href="/en/create/love-letter" data-astro-cid-y5jxqnse="">Create a Letter</a> <a href="/en#howitworks-section" data-astro-cid-y5jxqnse="">How it works</a> <a href="/en#pricing" data-astro-cid-y5jxqnse="">Pricing</a> <a href="/en#showcase-grid-section" data-astro-cid-y5jxqnse="">Examples</a> <a href="/en/my-gifts" data-astro-cid-y5jxqnse="">My Letters</a> <a href="/en/blog" data-astro-cid-y5jxqnse="">Blog</a> </nav> <nav aria-label="Support &amp; Contact" data-astro-cid-y5jxqnse=""> <h2 data-astro-cid-y5jxqnse="">Support &amp; Contact</h2> <a href="/en/contact" data-astro-cid-y5jxqnse="">Help Center</a> <a href="mailto:contact@2-luv.com" data-astro-cid-y5jxqnse="">Support Email</a> <a href="mailto:contact@2-luv.com?subject=Partnerships" data-astro-cid-y5jxqnse="">Partnerships</a> <div class="footer-contact" data-astro-cid-y5jxqnse=""> <a href="tel:+14322803615" data-astro-cid-y5jxqnse=""> <svg viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-y5jxqnse=""><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.31 1.85.53 2.81.66A2 2 0 0 1 22 16.92z" data-astro-cid-y5jxqnse=""></path></svg>
++1 432-280-3615
+</a> <a href="mailto:contact@2-luv.com" data-astro-cid-y5jxqnse=""> <svg viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-y5jxqnse=""><rect width="20" height="16" x="2" y="4" rx="2" data-astro-cid-y5jxqnse=""></rect><path d="m22 7-10 6L2 7" data-astro-cid-y5jxqnse=""></path></svg>
+contact@2-luv.com
+</a> </div> </nav> <nav aria-label="Legal" data-astro-cid-y5jxqnse=""> <h2 data-astro-cid-y5jxqnse="">Legal</h2> <a href="/en/terms" data-astro-cid-y5jxqnse="">Terms of Use</a> <a href="/en/privacy" data-astro-cid-y5jxqnse="">Privacy Policy</a> <a href="/en/cookies" data-astro-cid-y5jxqnse="">Cookie Policy</a> <a href="/en/copyright" data-astro-cid-y5jxqnse="">Copyright</a> <a class="dmca-badge" href="/en/dmca" data-astro-cid-y5jxqnse=""> <svg viewBox="0 0 24 24" aria-hidden="true" data-astro-cid-y5jxqnse=""><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" data-astro-cid-y5jxqnse=""></path></svg> DMCA Protected </a> <p data-astro-cid-y5jxqnse="">Your privacy is our priority. See how we care for your data in the Privacy Policy.</p> </nav> </div> <div class="footer-bottom" data-astro-cid-y5jxqnse=""> <p data-astro-cid-y5jxqnse="">© 2025-2026 2luv. All rights reserved.</p> <p data-astro-cid-y5jxqnse="">2 PROJECTS LTDA | Imperatriz - MA | Brazil | CNPJ: 64.092.616/0001-12</p> <p data-astro-cid-y5jxqnse="">Total or partial reproduction of the content, design or functionality of this website is prohibited and protected by Law 9.610/98.</p> </div> </div> </footer> <div data-privacy-cookie-mount="" data-astro-cid-37fxchfa=""><!----><!----><!----> <!----></div> <div data-privacy-analytics-mount="" data-astro-cid-37fxchfa=""></div> <div data-privacy-attribution-mount="" data-astro-cid-37fxchfa=""></div> <script type="application/json" data-privacy-config="">{"copy":{"title":"Cookie Policy","description":"We use cookies to improve your experience, remember your preferences, and personalize your browsing.","legalLinksText":"Review our {privacyPolicyLink} and {cookiesPolicyLink} for details about data use and consent choices.","privacyPolicy":"For more details, please see our","privacyPolicyLink":"Privacy Policy","cookiesPolicy":"For more details, please see our","cookiesPolicyLink":"Cookie Policy","acceptButton":"Accept all","rejectButton":"Reject optional","customizeButton":"Customize","savePreferencesButton":"Save preferences","analyticsTitle":"Analytics","analyticsDescription":"Helps us understand usage (statistics).","adsTitle":"Ads measurement","adsDescription":"Helps measure ads and conversions.","adUserDataTitle":"Ad user data","adUserDataDescription":"Allows sending user data to improve conversion measurement.","adPersonalizationTitle":"Ad personalization","adPersonalizationDescription":"Allows remarketing and personalized ads.","manageCookiesButton":"Manage cookies","youtube":{"watchMessage":"To watch this video, you need to accept cookies.","previewMessage":"To see this YouTube preview, please accept cookies.","loadMessage":"To load this YouTube video, please accept cookies."},"close":"Close","backButton":"Back","eyebrow":"Privacy controls","modalTitle":"Cookie preferences","modalDescription":"Choose which optional cookies and local storage categories 2luv can use on this device.","preferencesTitle":"Preferences","preferencesDescription":"Remembers language, region and interface choices.","marketingTitle":"Marketing and embeds","marketingDescription":"Enables ad attribution and third-party media previews.","necessaryTitle":"Necessary","necessaryDescription":"Required for security, checkout, password-protected letters and core create flows.","alwaysOn":"Always on","enabled":"On","disabled":"Off","deleteDeviceDataButton":"Delete this device data","deleteConfirm":"Delete cookies, drafts, local media previews and access data from this device?","deleteDeviceDataDescription":"Deletes cookies, drafts, local media previews and access data stored by 2luv in this browser.","deleteDeviceDataWorking":"Deleting data...","deleteDeviceDataSuccess":"Browsing data deleted from this device.","deleteDeviceDataError":"We could not delete all browsing data. Try again or clear data in your browser settings.","embedBlockedMessage":"Accept marketing cookies to load this third-party media preview."},"locale":"en","privacyUrl":"/en/privacy","manageUrl":"/en/cookies","suppressInitialBanner":true,"sentryDsn":"https://93b8caee5b49869f637baaa7049ab9bb@o4511286474113024.ingest.us.sentry.io/4511587165863936","sentryEnvironment":"production","sentryRelease":"22626b7acadc0c540ed96bf0390e26aecdd21dd2","apiBaseUrl":"https://api.2-luv.com","sentryTracesSampleRate":"0.1"}</script> <script type="module">const r="/_lazy/privacy-controls.js";function i(o){const e=window;return e.__TWOLUV_PRIVACY_BOOT__?(e.__TWOLUV_PRIVACY_BOOT__(),o&&window.dispatchEvent(new CustomEvent("2luv:open-cookie-preferences",{detail:o})),e.__TWOLUV_PRIVACY_BUNDLE__):(e.__TWOLUV_PRIVACY_BUNDLE__||=import(r).then(t=>{const n=t.bootPrivacyControls;n&&(e.__TWOLUV_PRIVACY_BOOT__=n,n()),o&&window.dispatchEvent(new CustomEvent("2luv:open-cookie-preferences",{detail:o}))}).catch(t=>{e.__TWOLUV_PRIVACY_BUNDLE__=void 0,console.error("[2luv] Failed to load privacy controls.",t)}),e.__TWOLUV_PRIVACY_BUNDLE__)}function c(){try{return window.localStorage.getItem("cookie-consent")?!0:document.cookie.split(";").some(o=>o.trim().startsWith("cookie-consent="))}catch{return!1}}function _(){const o=c()?1600:700,e=()=>{i()},t=window.requestIdleCallback;t?t(e,{timeout:o}):globalThis.setTimeout(e,o)}document.addEventListener("click",o=>{if(window.__TWOLUV_PRIVACY_BOOT__)return;const e=o.target instanceof Element?o.target.closest("[data-2luv-open-cookie-preferences]"):null;if(!e)return;o.preventDefault();const t=e.getAttribute("data-2luv-cookie-focus")||void 0;i(t?{focusCategory:t}:{})},!0);window.addEventListener("2luv:open-cookie-preferences",o=>{if(window.__TWOLUV_PRIVACY_BOOT__)return;o.stopImmediatePropagation();const e=o instanceof CustomEvent?o.detail:void 0;i(e)});_();document.addEventListener("astro:page-load",_);</script>  </body></html>

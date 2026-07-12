@@ -1,0 +1,34 @@
+[
+  {
+    "url": "https://www.2-luv.com/en",
+    "file": "html/en.html",
+    "screenshot": "_screenshots/en.png",
+    "title": "Create Your Digital Love Letter With QR Code | 2luv",
+    "status": 200,
+    "bytes": 266024
+  },
+  {
+    "url": "https://www.2-luv.com/en/cookies",
+    "file": "html/en/cookies.html",
+    "screenshot": "_screenshots/en_cookies.png",
+    "title": "Cookie Policy | Learn what cookies are, which cookies\u2026",
+    "status": 200,
+    "bytes": 90346
+  },
+  {
+    "url": "https://www.2-luv.com/en/letter/dd602b2fb0",
+    "file": "html/en/letter/dd602b2fb0.html",
+    "screenshot": "_screenshots/en_letter_dd602b2fb0.png",
+    "title": "MJ | 2luv",
+    "status": 200,
+    "bytes": 278661
+  },
+  {
+    "url": "https://www.2-luv.com/en/privacy",
+    "file": "html/en/privacy.html",
+    "screenshot": "_screenshots/en_privacy.png",
+    "title": "Privacy Policy | Data Protection & Privacy",
+    "status": 200,
+    "bytes": 107589
+  }
+]
