@@ -434,19 +434,10 @@ function GiftBox({ opening }: { opening: boolean }) {
 
 function CountdownScreen({ onReachZero }: { onReachZero: () => void }) {
   const [now, setNow] = useState(Date.now());
+  // Fixed target captured once on mount, so the countdown always runs toward a
+  // single moment (14 July midnight) and simply stops at zero — it can never
+  // loop or restart, even across refreshes.
   const target = useRef(getTargetDate().getTime());
-  const [passed, setPassed] = useState(isBirthdayPassed());
-
-  // Preview mode: add ?preview=1 to the URL to reveal the "read my heart"
-  // button right away so the flow can be tested before midnight. Without the
-  // flag the button stays hidden until the countdown actually reaches zero,
-  // so the real surprise still has to wait for midnight. Set in an effect to
-  // avoid a server/client hydration mismatch.
-  const [preview, setPreview] = useState(false);
-  useEffect(() => {
-    setPreview(new URLSearchParams(window.location.search).has("preview"));
-  }, []);
-
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 47);
@@ -456,13 +447,6 @@ function CountdownScreen({ onReachZero }: { onReachZero: () => void }) {
   const rawDiff = target.current - now;
   const reached = rawDiff <= 0;
   const diff = Math.max(0, rawDiff);
-
-  // Returning-visitor mode
-  useEffect(() => {
-    setPassed(isBirthdayPassed());
-  }, [now]);
-
-  if (passed) return <JourneyCounter />;
 
   const d = reached ? 0 : diff;
   const days = Math.floor(d / 86400000);
@@ -515,7 +499,7 @@ function CountdownScreen({ onReachZero }: { onReachZero: () => void }) {
         </div>
 
 
-        {reached || preview ? (
+        {reached ? (
           <button
             onClick={onReachZero}
             className="mt-10 group inline-flex items-center gap-3 rounded-full px-7 py-4 text-base font-medium text-white shadow-[0_10px_40px_-10px_rgba(236,72,153,0.7)] transition hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
@@ -548,48 +532,6 @@ function TimeBox({ value, label }: { value: number | string; label: string }) {
       <div className="text-2xl font-medium tabular-nums">{value}</div>
       <div className="text-[9px] tracking-[0.25em] text-white/60 uppercase mt-0.5">
         {label}
-      </div>
-    </div>
-  );
-}
-
-/* Returning-visitor "Our Journey" counter — replaces birthday countdown after 14 July */
-function JourneyCounter() {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, []);
-  const start = new Date(new Date().getFullYear(), 6, 14, 0, 0, 0).getTime();
-  const days = Math.max(0, Math.floor((now - start) / 86400000));
-  return (
-    <div
-      className="relative min-h-screen overflow-hidden text-white animate-fade-in flex flex-col items-center justify-center px-6"
-      style={{
-        background:
-          "radial-gradient(ellipse at center, #3a1030 0%, #1c0818 55%, #0a0308 100%)",
-      }}
-    >
-      <FireworksCanvas />
-      <div className="relative z-10 text-center">
-        <div className="text-[11px] tracking-[0.35em] text-amber-400 uppercase">
-          Our Journey
-        </div>
-        <h1
-          className="mt-4 font-serif italic text-6xl bg-clip-text text-transparent"
-          style={{
-            backgroundImage:
-              "linear-gradient(180deg,#f9a8d4 0%,#f59e0b 55%,#ec4899 100%)",
-          }}
-        >
-          Still counting.
-        </h1>
-        <div className="mt-10 grid grid-cols-2 gap-3 max-w-md">
-          <TimeBox value={days} label="❤️ Days Together" />
-          <TimeBox value={days} label="🌅 Sunrises Shared" />
-          <TimeBox value={Math.floor(days * 2.4)} label="🙏 Prayers Shared" />
-          <TimeBox value={1} label="🎂 Birthdays Celebrated" />
-        </div>
       </div>
     </div>
   );
