@@ -44,19 +44,15 @@ type Step =
   | "finalCountdown"
   | "final";
 
-/** Birthday moment: 14 July, 00:00 local time. Auto-rolls to next year after. */
+/**
+ * Birthday moment: 14 July, 00:00 local time (this year). The countdown ticks
+ * toward it and then simply sits at zero once it's passed — it never rolls
+ * forward to next year, so opening or returning after midnight always shows
+ * zero and reveals the letter.
+ */
 function getTargetDate() {
   const now = new Date();
-  const thisYear = new Date(now.getFullYear(), 6, 14, 0, 0, 0);
-  if (now.getTime() < thisYear.getTime()) return thisYear;
-  return new Date(now.getFullYear() + 1, 6, 14, 0, 0, 0);
-}
-
-/** True once the birthday has actually happened this year (14 July or later). */
-function isBirthdayPassed() {
-  const now = new Date();
-  const target = new Date(now.getFullYear(), 6, 14, 0, 0, 0);
-  return now.getTime() >= target.getTime();
+  return new Date(now.getFullYear(), 6, 14, 0, 0, 0);
 }
 
 /**
@@ -92,8 +88,11 @@ function LetterPage() {
     if (opening) return;
     setOpening(true);
     timerRef.current = window.setTimeout(() => {
-      // Returning visitor: skip countdown, go straight to the journey.
-      setStep(isBirthdayPassed() ? "page1" : "countdown");
+      // Always land on the countdown. Before midnight it ticks down; once the
+      // birthday has arrived it sits at zero and reveals the button — live,
+      // with no refresh needed, and the same whether or not she was watching
+      // when it hit zero or is only now coming back to it.
+      setStep("countdown");
     }, 850);
   };
 
@@ -201,16 +200,18 @@ function CoverScreen({
           <div className="font-serif italic font-bold text-3xl sm:text-4xl tracking-wide text-neutral-800">
             Tap to open
           </div>
-          <svg width="80" height="70" viewBox="0 0 80 70" aria-hidden className="cover-arrow-down mt-1">
+          <svg width="60" height="72" viewBox="0 0 60 72" aria-hidden className="cover-arrow-down mt-1">
+            {/* straight shaft pointing down at the gift */}
             <path
-              d="M12 10 C 28 48, 52 48, 68 10"
+              d="M30 6 L30 50"
               fill="none"
               stroke="#e11d48"
               strokeWidth="4"
               strokeLinecap="round"
             />
+            {/* downward chevron head */}
             <path
-              d="M56 44 L68 60 L52 58"
+              d="M15 37 L30 54 L45 37"
               fill="none"
               stroke="#e11d48"
               strokeWidth="4"
