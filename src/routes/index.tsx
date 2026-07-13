@@ -17,12 +17,12 @@ export const Route = createFileRoute("/")({
   component: LetterPage,
   head: () => ({
     meta: [
-      { title: "A letter for Mokgethwa, from Thatekgo" },
+      { title: "A letter for Mokgethwa, from Thatego" },
       {
         name: "description",
         content: "A personal birthday letter for Mokgethwa. Tap to open.",
       },
-      { property: "og:title", content: "A letter for Mokgethwa, from Thatekgo" },
+      { property: "og:title", content: "A letter for Mokgethwa, from Thatego" },
       {
         property: "og:description",
         content: "A personal birthday letter for Mokgethwa. Tap to open.",
@@ -59,22 +59,34 @@ function isBirthdayPassed() {
   return now.getTime() >= target.getTime();
 }
 
-/** The final in-person surprise moment — 3 days after the birthday for now. */
+/**
+ * The in-person surprise moment — 14 July at 3:45 PM (15:45).
+ * That's the birthday countdown's midnight target + 15h45m, i.e. when
+ * I'll actually get to see her in the afternoon. Rolls to next year once past.
+ */
 function getFinalSurpriseDate() {
   const now = new Date();
-  const year =
-    now.getMonth() > 6 || (now.getMonth() === 6 && now.getDate() > 17)
-      ? now.getFullYear() + 1
-      : now.getFullYear();
-  return new Date(year, 6, 17, 18, 0, 0);
+  const thisYear = new Date(now.getFullYear(), 6, 14, 15, 45, 0);
+  if (now.getTime() < thisYear.getTime()) return thisYear;
+  return new Date(now.getFullYear() + 1, 6, 14, 15, 45, 0);
 }
 
 function LetterPage() {
   const [step, setStep] = useState<Step>("cover");
   const [opening, setOpening] = useState(false);
   const [musicOn, setMusicOn] = useState(false);
+  const [musicLoading, setMusicLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<number | null>(null);
+
+  // Warm up the song in the background as soon as the letter mounts so the
+  // first tap on Play starts (almost) instantly instead of buffering cold.
+  useEffect(() => {
+    const el = audioRef.current;
+    if (el) {
+      try { el.load(); } catch { /* ignore */ }
+    }
+  }, []);
 
   const openGift = () => {
     if (opening) return;
@@ -104,27 +116,34 @@ function LetterPage() {
     if ((step === "page5" || step === "final") && musicOn) {
       el.pause();
       setMusicOn(false);
+      setMusicLoading(false);
     }
   }, [step, musicOn]);
 
   const toggleMusic = () => {
     const el = audioRef.current;
     if (!el) return;
-    if (musicOn) {
+    if (musicOn || musicLoading) {
       el.pause();
       setMusicOn(false);
+      setMusicLoading(false);
     } else {
       // Song shines from minute 1 onwards — start there the first time.
       if (el.currentTime < 60) {
         try { el.currentTime = 60; } catch { /* seek can fail before metadata loads */ }
       }
-      el.play().then(() => setMusicOn(true)).catch(() => setMusicOn(false));
+      // Show a spinner while the audio buffers; play() resolves once it
+      // actually starts, so clear the spinner then (or on failure).
+      setMusicLoading(true);
+      el.play()
+        .then(() => { setMusicOn(true); setMusicLoading(false); })
+        .catch(() => { setMusicOn(false); setMusicLoading(false); });
     }
   };
 
   return (
     <div className="min-h-screen w-full overflow-hidden">
-      <audio ref={audioRef} src={songAsset.url} loop preload="none" />
+      <audio ref={audioRef} src={songAsset.url} loop preload="auto" />
 
       {step === "cover" && <CoverScreen opening={opening} onOpen={openGift} />}
       {step === "countdown" && (
@@ -158,70 +177,8 @@ function LetterPage() {
         <>
           <FloatingHearts />
           <FloatingStars />
-          <MusicButton on={musicOn} onToggle={toggleMusic} />
+          <MusicButton on={musicOn} loading={musicLoading} onToggle={toggleMusic} />
         </>
-      )}
-
-      {/* TEMP: dev step navigator so we can preview every step */}
-      <StepNav current={step} onGo={setStep} />
-    </div>
-  );
-}
-
-const STEP_ORDER: Step[] = [
-  "cover",
-  "countdown",
-  "celebration",
-  "page1",
-  "page2",
-  "page3",
-  "page4",
-  "page5",
-  "finalCountdown",
-  "final",
-];
-
-const STEP_LABELS: Record<Step, string> = {
-  cover: "1 · Cover",
-  countdown: "2 · Countdown",
-  celebration: "3 · Midnight",
-  page1: "4 · Intro",
-  page2: "5 · Gallery",
-  page3: "6 · Reasons",
-  page4: "7 · Surprise",
-  page5: "8 · Letter",
-  page6: "— (removed)",
-  finalCountdown: "9 · Final Countdown",
-  final: "10 · Farewell",
-};
-
-function StepNav({ current, onGo }: { current: Step; onGo: (s: Step) => void }) {
-  const [open, setOpen] = useState(true);
-  return (
-    <div className="fixed bottom-5 left-5 z-[60] text-xs font-mono">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="rounded-full bg-black/80 text-white px-3 py-1.5 shadow-lg backdrop-blur border border-white/10"
-      >
-        {open ? "Hide steps" : "Show steps"}
-      </button>
-      {open && (
-        <div className="mt-2 flex flex-col gap-1 max-h-[70vh] overflow-auto rounded-xl bg-black/80 text-white p-2 shadow-2xl backdrop-blur border border-white/10">
-          {STEP_ORDER.map((s) => (
-            <button
-              key={s}
-              onClick={() => onGo(s)}
-              className={
-                "text-left px-2 py-1 rounded transition " +
-                (current === s
-                  ? "bg-pink-500/90 text-white"
-                  : "hover:bg-white/10 text-white/80")
-              }
-            >
-              {STEP_LABELS[s]}
-            </button>
-          ))}
-        </div>
       )}
     </div>
   );
@@ -285,7 +242,7 @@ function CoverScreen({
           <div className="mt-4 text-[11px] tracking-[0.25em] text-neutral-500">
             <span className="uppercase">From</span>{" "}
             <span className="italic font-serif normal-case text-neutral-700">
-              Thatekgo
+              Thatego
             </span>
           </div>
         </div>
@@ -479,7 +436,17 @@ function CountdownScreen({ onReachZero }: { onReachZero: () => void }) {
   const [now, setNow] = useState(Date.now());
   const target = useRef(getTargetDate().getTime());
   const [passed, setPassed] = useState(isBirthdayPassed());
-  
+
+  // Preview mode: add ?preview=1 to the URL to reveal the "read my heart"
+  // button right away so the flow can be tested before midnight. Without the
+  // flag the button stays hidden until the countdown actually reaches zero,
+  // so the real surprise still has to wait for midnight. Set in an effect to
+  // avoid a server/client hydration mismatch.
+  const [preview, setPreview] = useState(false);
+  useEffect(() => {
+    setPreview(new URLSearchParams(window.location.search).has("preview"));
+  }, []);
+
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 47);
@@ -548,7 +515,7 @@ function CountdownScreen({ onReachZero }: { onReachZero: () => void }) {
         </div>
 
 
-        {reached ? (
+        {reached || preview ? (
           <button
             onClick={onReachZero}
             className="mt-10 group inline-flex items-center gap-3 rounded-full px-7 py-4 text-base font-medium text-white shadow-[0_10px_40px_-10px_rgba(236,72,153,0.7)] transition hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-300"
@@ -744,7 +711,7 @@ function CelebrationScreen({ onContinue }: { onContinue: () => void }) {
   const [showNext, setShowNext] = useState(false);
   useEffect(() => {
     const t1 = window.setTimeout(() => setShowNext(true), 3500);
-    const t2 = window.setTimeout(onContinue, 15000);
+    const t2 = window.setTimeout(onContinue, 7000);
     return () => { window.clearTimeout(t1); window.clearTimeout(t2); };
   }, [onContinue]);
 
@@ -844,10 +811,10 @@ function PageOne({ onBack, onContinue }: { onBack: () => void; onContinue: () =>
           Happy Birthday, Mokgethwa <span className="text-rose-500">❤️</span>
         </h1>
         <div className="mt-2 text-xs tracking-[0.3em] uppercase text-neutral-500">
-          From Thatekgo
+          From Thatego
         </div>
         <p className="mt-10 text-lg font-serif italic text-neutral-700 leading-relaxed">
-          Two years ago I prayed for peace.
+          A year ago I prayed for peace.
         </p>
         <p className="mt-2 text-lg font-serif italic text-neutral-700 leading-relaxed">
           God answered with you.
@@ -945,6 +912,7 @@ function PageThreeReasons({ onBack, onContinue }: { onBack: () => void; onContin
     "Your faith",
     "Your beautiful heart",
     "The way you make people feel loved",
+    "Obviously also how beautiful & perfect you are.",
   ];
   const [i, setI] = useState(0);
   const done = i >= cards.length - 1;
@@ -1049,7 +1017,7 @@ Happy birthday, my love. Hope you enjoy your day as much as I'll try to make it 
 Love you always ❤️
 
 Yours,
-Thatekgo`;
+Thatego`;
 
 function PageFiveLetter({ onBack, onContinue }: { onBack: () => void; onContinue: () => void }) {
   const [shown, setShown] = useState("");
@@ -1607,24 +1575,44 @@ function FloatingStars() {
   );
 }
 
-function MusicButton({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+function MusicButton({
+  on,
+  loading,
+  onToggle,
+}: {
+  on: boolean;
+  loading?: boolean;
+  onToggle: () => void;
+}) {
   return (
     <button
       onClick={onToggle}
-      aria-label={on ? "Pause your favourite song" : "Play your favourite song"}
+      aria-label={
+        loading
+          ? "Loading your favourite song"
+          : on
+            ? "Pause your favourite song"
+            : "Play your favourite song"
+      }
       className="fixed bottom-5 right-5 z-50 rounded-full bg-white/95 backdrop-blur pl-3 pr-4 py-2.5 text-sm text-neutral-700 shadow-lg border border-white flex items-center gap-2 hover:shadow-xl transition music-btn-float"
     >
       <span
         className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-xs"
         style={{ background: "linear-gradient(135deg,#ec4899,#a855f7)" }}
       >
-        {on ? "⏸" : "▶"}
+        {loading ? (
+          <span className="w-3.5 h-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+        ) : on ? (
+          "⏸"
+        ) : (
+          "▶"
+        )}
       </span>
       <span className="font-medium whitespace-nowrap">
-        {on ? "Pause" : "Play"}
+        {loading ? "Loading…" : on ? "Pause" : "Play"}
       </span>
       <span className="text-neutral-500 text-xs italic whitespace-nowrap">
-        your favourite song, while you wait
+        {loading ? "one moment, warming it up" : "your favourite song, while you wait"}
       </span>
 
       <style>{`
