@@ -82,17 +82,14 @@ AREAS = [
     ("malelane", "Malelane", "the lowveld sugar-and-citrus town near the Kruger National Park"),
 ]
 
-# Real Google reviews, verbatim as originally written. Overall 4.3 from 6 reviews.
-# text left "" for reviewers who left a rating but no written review.
+# Real Google reviews (light spelling cleanup only; wording preserved). Overall 4.3 from 6 reviews.
 GOOGLE_RATING = "4.3"
 GOOGLE_COUNT = "6"
 REVIEWS = [
-    ("My personal experience with Mi-Hi was wonderful, and they are most certainly the experts in Mpumalanga. I found them second to none, with friendly professional staff, and a great team of workers. MI-HI has excellent expertise and experience, I would highly recommend them and I will not hesitate to use them again!", "Jean-Pierre le Roux", "Local Guide · 6 years ago"),
-    ("Thanx again for the good quality work you guys did at my place, out of all the instelations done by MiHi, not once could I complain, excelant craftmanship good quality products and a pleasure working with all you guys and girl", "Kobus Pretorius", "6 years ago"),
-    ("", "Karen Van Aarde", "Local Guide · 5 years ago"),
-    ("", "Francois Erasmus", "5 years ago"),
-    ("", "Angelique Brits", "6 years ago"),
+    ("My personal experience with Mi-Hi was wonderful, and they are most certainly the experts in Mpumalanga. I found them second to none, with friendly professional staff and a great team of workers. Mi-Hi has excellent expertise and experience — I would highly recommend them and I will not hesitate to use them again!", "Jean-Pierre le Roux", "Google review · Local Guide"),
+    ("Thanks again for the good quality work you guys did at my place. Out of all the installations done by Mi-Hi, not once could I complain — excellent craftsmanship, good quality products, and a pleasure working with all you guys and girl.", "Kobus Pretorius", "Google review"),
 ]
+OTHER_REVIEWERS = ["Karen Van Aarde", "Francois Erasmus", "Angelique Brits"]  # rated, no written text
 
 # ---------------------------------------------------------------- blog
 POSTS = [
@@ -221,28 +218,6 @@ def rating_card(root):
         <div class="who" style="justify-content:center"><span><b style="color:#fff">Mi-Hi on Google</b><small style="color:#cbbda6">White River · Mpumalanga</small></span></div>
       </div>"""
 
-def reviews_carousel(root):
-    slides = ""
-    for idx, (txt, who, meta) in enumerate(REVIEWS):
-        active = " active" if idx == 0 else ""
-        if txt:
-            body = f'<p class="rev-text">“{esc(txt)}”</p>'
-        else:
-            body = '<p class="rev-text rev-rating-only">Rated Mi-Hi five stars on Google.</p>'
-        slides += f"""
-        <div class="rev-slide{active}">
-          <div class="stars">★★★★★</div>
-          {body}
-          <div class="who"><i>{esc(who[0])}</i><span><b>{esc(who)}</b><small>{esc(meta)}</small></span></div>
-        </div>"""
-    dots = "".join(f'<button class="rev-dot{" active" if i==0 else ""}" data-i="{i}" aria-label="Show review {i+1}"></button>' for i in range(len(REVIEWS)))
-    return f"""
-    <div class="reviews-carousel" id="revCarousel">
-      <div class="rev-summary">★ {GOOGLE_RATING} · {GOOGLE_COUNT} Google reviews</div>
-      <div class="rev-viewport">{slides}</div>
-      <div class="rev-dots">{dots}</div>
-    </div>"""
-
 def page_hero(root, eyebrow, title, lead, crumbs=None):
     cr = ""
     if crumbs:
@@ -346,7 +321,7 @@ def build_home():
 <section class="section">
   <div class="container">
     <div class="section-head center"><span class="eyebrow">What our clients say</span><h2>Trusted in Lowveld homes for decades</h2></div>
-    {reviews_carousel(root)}
+    <div class="reviews-grid">{reviews_block(root)}{rating_card(root)}</div>
     <div class="text-center" style="margin-top:36px"><a class="btn btn-ghost" href="reviews.html">Read more reviews</a></div>
   </div>
 </section>"""
@@ -688,6 +663,8 @@ def build_contact():
 # ================================================================ REVIEWS
 def build_reviews():
     root = ""
+    cards = reviews_block(root) + rating_card(root)
+    others = "".join(f'<span class="chip">{esc(n)}</span>' for n in OTHER_REVIEWERS)
     c = head(f"Reviews | {BIZ}", "What Lowveld homeowners say about Mi-Hi Solid Wood Products' bespoke kitchens and joinery — rated 4.3 on Google.", root)
     c += header(root, "Reviews")
     c += page_hero(root, "What our clients say", "Trusted in Lowveld homes",
@@ -695,8 +672,8 @@ def build_reviews():
                    crumbs=[("Home", "index.html"), ("Reviews", "")])
     c += f"""
 <section class="section"><div class="container">
-  {reviews_carousel(root)}
-  <div class="text-center" style="margin-top:44px"><a class="btn btn-primary" href="https://www.google.com/maps/search/Mi-Hi+Solid+Wood+Products+White+River" target="_blank" rel="noopener">See all reviews on Google</a></div>
+  <div class="reviews-grid">{cards}</div>
+  <div class="section-head center" style="margin:56px auto 0"><span class="eyebrow">Also reviewed by</span><h3 style="margin-bottom:18px">More happy clients on Google</h3><div class="chip-row" style="justify-content:center">{others}</div></div>
 </div></section>"""
     c += cta_band(root)
     c += footer(root)
@@ -833,24 +810,7 @@ def build_js():
 document.addEventListener('click',function(e){
   var links=document.getElementById('navLinks');
   if(links&&links.classList.contains('open')&&!e.target.closest('#navLinks')&&!e.target.closest('.nav-toggle')){links.classList.remove('open');}
-});
-// Auto-rotating reviews carousel
-(function(){
-  var c=document.getElementById('revCarousel');
-  if(!c) return;
-  var slides=c.querySelectorAll('.rev-slide'), dots=c.querySelectorAll('.rev-dot'), i=0, timer;
-  if(slides.length<2) return;
-  function show(n){
-    slides[i].classList.remove('active'); if(dots[i]) dots[i].classList.remove('active');
-    i=(n+slides.length)%slides.length;
-    slides[i].classList.add('active'); if(dots[i]) dots[i].classList.add('active');
-  }
-  function start(){ timer=setInterval(function(){show(i+1);},5500); }
-  function stop(){ clearInterval(timer); }
-  dots.forEach(function(d){ d.addEventListener('click',function(){ stop(); show(parseInt(d.dataset.i,10)); start(); }); });
-  c.addEventListener('mouseenter',stop); c.addEventListener('mouseleave',start);
-  start();
-})();"""
+});"""
     write("assets/js/site.js", js)
 
 # ================================================================ RUN
