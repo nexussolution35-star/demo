@@ -38,7 +38,7 @@ SERVICES = [
      "Every home is different, so every cupboard we build is too. From sliding-door wardrobes with mirror inlays to walk-in dressing rooms, we make storage that fits your space exactly.",
      ["Hinged, sliding and lattice door options", "Mirror, glass and solid-timber door panels",
       "Fully fitted interiors — shelving, rails, drawers", "Safe and jewellery-drawer integration",
-      "Matched finishes across the whole home"], "project-04.jpg"),
+      "Matched finishes across the whole home"], "project-16.jpg"),
     ("bars", "Bars & Entertainment Units",
      "Statement bars and entertainment areas built for hosting.",
      "A well-made bar turns a room into the heart of the party. We build freestanding and built-in bars with wine storage, brass and steel detailing, feature lighting and hard-wearing tops.",
@@ -50,13 +50,13 @@ SERVICES = [
      "Combine solid wood and MDF for the best of both worlds — warm timber grain where it shows, clean painted panels where it counts. Cable management and floating shelving as standard.",
      ["Floating and full-wall media units", "Solid-wood and MDF combination builds",
       "Concealed cable management", "Display and closed storage mix",
-      "Lighting and feature-niche options"], "project-08.jpg"),
+      "Lighting and feature-niche options"], "project-14.jpg"),
     ("bathroom-vanities", "Bathroom Vanities",
      "Moisture-smart vanities with the warmth of real wood.",
      "Bathroom joinery has to look beautiful and survive daily humidity. We build sealed, moisture-resistant vanities in solid wood and Duco, topped with granite or quartz and fitted around your basin of choice.",
      ["Freestanding and wall-hung vanities", "Sealed, moisture-resistant construction",
       "Granite & quartz tops with under- or over-counter basins", "Matching mirror cabinets and storage",
-      "Finishes coordinated with your tiling"], "project-11.jpg"),
+      "Finishes coordinated with your tiling"], "project-12.jpg"),
     ("office-furniture", "Office & Study Furniture",
      "Home offices and studies built for focus and finished to impress.",
      "Purpose-built desks, wall-to-wall bookshelves and credenzas in solid wood — furniture that makes working from home feel like an upgrade, not a compromise.",
@@ -82,11 +82,14 @@ AREAS = [
     ("malelane", "Malelane", "the lowveld sugar-and-citrus town near the Kruger National Park"),
 ]
 
-REVIEWS = [  # PLACEHOLDER copy — Stage 3 swaps in real Google/Facebook reviews
-    ("Our kitchen is the talk of every dinner party. The solid-wood finish is flawless and the fit is perfect — you can see the craftsmanship in every joint.", "R. van der Merwe", "Kitchen · White River"),
-    ("Mi-Hi built our bar and entertainment unit exactly as we imagined it. Professional from the first drawing to the final install.", "T. Nkosi", "Bar · Mbombela"),
-    ("After nearly 40 years they still care about every detail. Our built-in cupboards fit wall to wall without a single gap.", "L. Botha", "Cupboards · Hazyview"),
+# Real Google reviews (light spelling cleanup only; wording preserved). Overall 4.3 from 6 reviews.
+GOOGLE_RATING = "4.3"
+GOOGLE_COUNT = "6"
+REVIEWS = [
+    ("My personal experience with Mi-Hi was wonderful, and they are most certainly the experts in Mpumalanga. I found them second to none, with friendly professional staff and a great team of workers. Mi-Hi has excellent expertise and experience — I would highly recommend them and I will not hesitate to use them again!", "Jean-Pierre le Roux", "Google review · Local Guide"),
+    ("Thanks again for the good quality work you guys did at my place. Out of all the installations done by Mi-Hi, not once could I complain — excellent craftsmanship, good quality products, and a pleasure working with all you guys and girl.", "Kobus Pretorius", "Google review"),
 ]
+OTHER_REVIEWERS = ["Karen Van Aarde", "Francois Erasmus", "Angelique Brits"]  # rated, no written text
 
 # ---------------------------------------------------------------- blog
 POSTS = [
@@ -97,7 +100,7 @@ POSTS = [
      "Kitchens", "project-15.jpg",
      "Small footprint, big ideas. Custom joinery is how you claw back every usable centimetre in a compact South African kitchen."),
     ("modern-built-in-cupboard-added-safety", "A Modern Built-In Cupboard Design with Added Safety",
-     "Built-In Cupboards", "project-04.jpg",
+     "Built-In Cupboards", "project-16.jpg",
      "How a hidden safe drawer and considered internal layout turn a wardrobe into secure, everyday storage."),
     ("types-of-countertops-and-care", "Types of Countertops and How to Care for Them",
      "Countertops", "project-03.jpg",
@@ -106,7 +109,7 @@ POSTS = [
      "Bars", "project-06.jpg",
      "Built-in bars and braai joinery that stand up to Lowveld weekends and years of entertaining."),
     ("exquisite-bathroom-vanities", "Exquisite Craftsmanship in Every Bathroom Vanity",
-     "Bathroom Vanities", "project-11.jpg",
+     "Bathroom Vanities", "project-12.jpg",
      "Why a made-to-measure vanity outlasts and outclasses anything off the shelf."),
 ]
 CATEGORIES = ["Kitchens", "Built-In Cupboards", "Bars", "TV Units", "Bathroom Vanities", "Countertops"]
@@ -206,6 +209,15 @@ def reviews_block(root):
       </div>"""
     return cards
 
+def rating_card(root):
+    return f"""
+      <div class="review-card" style="display:flex;flex-direction:column;justify-content:center;text-align:center;background:var(--dark);color:#fff;border:0">
+        <div style="font-family:var(--font-display);font-weight:800;font-size:56px;line-height:1;color:var(--accent)">{GOOGLE_RATING}</div>
+        <div class="stars" style="justify-content:center;margin:8px 0">★★★★★</div>
+        <p style="color:#eaddcb;margin:0">Rated {GOOGLE_RATING} across {GOOGLE_COUNT} Google reviews</p>
+        <div class="who" style="justify-content:center"><span><b style="color:#fff">Mi-Hi on Google</b><small style="color:#cbbda6">White River · Mpumalanga</small></span></div>
+      </div>"""
+
 def page_hero(root, eyebrow, title, lead, crumbs=None):
     cr = ""
     if crumbs:
@@ -221,7 +233,7 @@ def page_hero(root, eyebrow, title, lead, crumbs=None):
   </div>
 </section>"""
 
-def cta_band(root, img_name="project-05.jpg"):
+def cta_band(root, img_name="project-18.jpg"):
     return f"""
 <section class="cta-band section">
   <div class="cta-band__bg"><img src="{img(root,img_name)}" alt=""></div>
@@ -309,7 +321,7 @@ def build_home():
 <section class="section">
   <div class="container">
     <div class="section-head center"><span class="eyebrow">What our clients say</span><h2>Trusted in Lowveld homes for decades</h2></div>
-    <div class="reviews-grid">{reviews_block(root)}</div>
+    <div class="reviews-grid">{reviews_block(root)}{rating_card(root)}</div>
     <div class="text-center" style="margin-top:36px"><a class="btn btn-ghost" href="reviews.html">Read more reviews</a></div>
   </div>
 </section>"""
@@ -317,7 +329,7 @@ def build_home():
     c += f"""
 <section class="section bg-surface">
   <div class="container split">
-    <img src="{img(root,'project-14.jpg')}" alt="Mi-Hi workshop craftsmanship">
+    <img src="{img(root,'project-07.jpg')}" alt="Mi-Hi workshop craftsmanship">
     <div>
       <span class="eyebrow">Owner-led & local</span>
       <h2>Made by hand in White River, not shipped in a flat pack.</h2>
@@ -446,7 +458,16 @@ def build_services():
         other = "".join(
             f'<a class="svc-card" href="{s2}.html"><div class="thumb"><img src="{img(root,i2)}" alt="{esc(n2)}"></div><div class="body"><h3>{esc(n2)}</h3><span class="more">Explore →</span></div></a>'
             for s2, n2, _sh, _b, _f, i2 in SERVICES if s2 != s)
-        gal_imgs = [GALLERY[(idx*2) % len(GALLERY)], GALLERY[(idx*2+1) % len(GALLERY)], GALLERY[(idx*2+2) % len(GALLERY)]]
+        gal_map = {
+            "kitchens": [1, 7, 9, 2, 10, 11],
+            "built-in-cupboards": [16, 5],
+            "bars": [6, 8, 18, 3],
+            "tv-units": [14, 17],
+            "bathroom-vanities": [12],
+            "office-furniture": [13, 5],
+            "countertops": [3, 2, 1, 10],
+        }
+        gal_imgs = [f"project-{i:02d}.jpg" for i in gal_map.get(s, [1, 2, 3])]
         gal = "".join(f'<a href="{root}gallery.html"><img src="{img(root,g)}" alt="{esc(n)} detail"></a>' for g in gal_imgs)
         area_links = "".join(f'<a href="{root}areas/{s}-{a}.html">{n} in {an} <span>→</span></a>' for a, an, _ in AREAS)
         c = head(f"{n} | {BIZ} | White River & the Lowveld",
@@ -642,20 +663,18 @@ def build_contact():
 # ================================================================ REVIEWS
 def build_reviews():
     root = ""
-    more = REVIEWS + [
-        ("From design to installation everything was on time and beautifully finished. Highly recommended.", "M. Sithole", "TV Unit · Sabie"),
-        ("The quality of the solid wood is exceptional. Our vanity still looks brand new years later.", "A. Pretorius", "Vanity · Barberton"),
-        ("They understood exactly what we wanted and improved on it. True craftsmen.", "J. Coetzee", "Office · Malelane"),
-    ]
-    cards = ""
-    for txt, who, role in more:
-        cards += f'<div class="review-card"><div class="stars">★★★★★</div><p>“{esc(txt)}”</p><div class="who"><i>{who[0]}</i><span><b>{esc(who)}</b><small>{esc(role)}</small></span></div></div>'
-    c = head(f"Reviews | {BIZ}", "What Lowveld homeowners say about Mi-Hi Solid Wood Products' bespoke kitchens and joinery.", root)
+    cards = reviews_block(root) + rating_card(root)
+    others = "".join(f'<span class="chip">{esc(n)}</span>' for n in OTHER_REVIEWERS)
+    c = head(f"Reviews | {BIZ}", "What Lowveld homeowners say about Mi-Hi Solid Wood Products' bespoke kitchens and joinery — rated 4.3 on Google.", root)
     c += header(root, "Reviews")
     c += page_hero(root, "What our clients say", "Trusted in Lowveld homes",
                    "Almost four decades of kitchens, cupboards and cabinetry — and the homeowners who live with them every day.",
                    crumbs=[("Home", "index.html"), ("Reviews", "")])
-    c += f'<section class="section"><div class="container"><div class="reviews-grid">{cards}</div><p class="form-note text-center" style="margin-top:30px">Testimonials shown are representative placeholders pending the client\'s live Google &amp; Facebook reviews.</p></div></section>'
+    c += f"""
+<section class="section"><div class="container">
+  <div class="reviews-grid">{cards}</div>
+  <div class="section-head center" style="margin:56px auto 0"><span class="eyebrow">Also reviewed by</span><h3 style="margin-bottom:18px">More happy clients on Google</h3><div class="chip-row" style="justify-content:center">{others}</div></div>
+</div></section>"""
     c += cta_band(root)
     c += footer(root)
     write("reviews.html", c)
