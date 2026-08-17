@@ -133,6 +133,10 @@ def head(title, desc, root):
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
+<link rel="icon" href="{root}assets/img/brand/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="{root}assets/img/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="{root}assets/img/brand/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="{root}assets/img/brand/favicon-180.png">
 <link rel="stylesheet" href="{root}assets/css/fonts.css">
 <link rel="stylesheet" href="{root}assets/css/site.css">
 </head>
