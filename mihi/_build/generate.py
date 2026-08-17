@@ -140,6 +140,7 @@ def header(root, active=""):
         cls = ' style="color:var(--accent)"' if l == active else ''
         return f'<li><a href="{root}{p}"{cls}>{l}</a></li>'
     links = "".join(_link(l, p) for l, p in NAV)
+    links += f'<li class="m-cta"><a class="btn btn-primary" href="{root}contact.html" style="display:inline-flex">Free Design Estimate</a></li>'
     return f"""
 <header class="site-header">
   <div class="container nav">
